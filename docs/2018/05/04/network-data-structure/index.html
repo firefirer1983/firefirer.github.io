@@ -90,7 +90,7 @@
 <meta property="og:image" content="https://github.com/firefirer.github.io/2018/05/04/network-data-structure/ip_encapsulation.jpg">
 <meta property="og:image" content="https://github.com/firefirer.github.io/2018/05/04/network-data-structure/ip_header.jpg">
 <meta property="og:image" content="https://github.com/firefirer.github.io/2018/05/04/network-data-structure/wiki-tcp-header-structure.png">
-<meta property="og:updated_time" content="2018-05-04T10:10:54.502Z">
+<meta property="og:updated_time" content="2018-05-04T15:49:35.081Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Network Data Structure">
 <meta name="twitter:description" content="Ethernet Frame  PREAMBLE (7 Bytes) Ethernet frame以7个字节的Preamble作为开始，Preamble有一连串的 0 和 1组成，作用是给发送和接收两边建立一个 bit 同步。  Preamble 在开始设计的时候，Ethernet frame在旧式的网络设备由于delay而在传输过程常常会丢失开始的一些bits，Preamble就作为防护带引入。">
@@ -442,7 +442,12 @@
 </li>
 <li>Flags (9 bits) aka Control bits<blockquote>
 <ul>
-<li>NS(1 bit):</li>
+<li>NS(1 bit):  实验性质，实际使用少  </li>
+<li>CWR(1 bit): Congestion Window Reduced flag</li>
+<li>URG(1 bit): 用于告知当前的数据是“紧急segment“，“紧急的segment”会被发送端立刻发出，<br>接收端收到后也会直接处理掉。无需等待之前的segment是否处理完。紧急segment常用的场景：　　<br>当host在发送数据到远端的设备．如果突然一个问题出现，host需要远端设备立刻停止处理之前的数据　　<br>这时候host就可以通过发送一个URG的segment来达到此目的了。</li>
+<li>ACK(1 bit): 用于告知对方成功接收packet</li>
+<li>PUSH(1 bit): 就像URG，PUSH存在的目的就是为了让segment在发送和接收端能够被优先处理掉<br>PUSH flag常用于数据传输的开始和结束阶段，同时影响到发送端和接收端的行为。<br>当某个host发送数据的时候，他会暂时将数据queue在一个TCP buffer(一块特殊的memory)。<br>TCP会一直等到buffer中的数据足够多，形成的segment的大小足够大才去发送出去。这样做的目的<br>是为了保证每个segment的有效性，不至于发送过多的小空segment导致浪费带宽。<br>但是在某种特殊情况下data queue的行为反而不合适，例如在视频直播的时候，数据不需要buf，<br>以免出现视频被cut off的现象。</li>
+<li>RST(1 bit): 当收到一个不该本链接收到的segment的时候，就会反馈一个RST flag</li>
 </ul>
 </blockquote>
 </li>
@@ -480,6 +485,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/firefirer.github.io/2018/05/04/hello-world/" rel="prev" title="Hexo Manual">
+                Hexo Manual <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
