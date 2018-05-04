@@ -90,7 +90,7 @@
 <meta property="og:image" content="https://github.com/firefirer.github.io/2018/05/04/network-data-structure/ip_encapsulation.jpg">
 <meta property="og:image" content="https://github.com/firefirer.github.io/2018/05/04/network-data-structure/ip_header.jpg">
 <meta property="og:image" content="https://github.com/firefirer.github.io/2018/05/04/network-data-structure/wiki-tcp-header-structure.png">
-<meta property="og:updated_time" content="2018-05-04T09:26:44.903Z">
+<meta property="og:updated_time" content="2018-05-04T10:10:54.502Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Network Data Structure">
 <meta name="twitter:description" content="Ethernet Frame  PREAMBLE (7 Bytes) Ethernet frame以7个字节的Preamble作为开始，Preamble有一连串的 0 和 1组成，作用是给发送和接收两边建立一个 bit 同步。  Preamble 在开始设计的时候，Ethernet frame在旧式的网络设备由于delay而在传输过程常常会丢失开始的一些bits，Preamble就作为防护带引入。">
@@ -409,24 +409,44 @@
 </blockquote>
 <h2 id="TCP-Sement-包括-nbsp-tcp-segment-header-tcp-segment-payload"><a href="#TCP-Sement-包括-nbsp-tcp-segment-header-tcp-segment-payload" class="headerlink" title="TCP Sement 包括 : &nbsp;  tcp segment header + tcp segment payload"></a>TCP Sement 包括 : &nbsp;  tcp segment header + tcp segment payload</h2><img src="/firefirer.github.io/2018/05/04/network-data-structure/wiki-tcp-header-structure.png">
 <h2 id="TCP-Header"><a href="#TCP-Header" class="headerlink" title="TCP Header"></a>TCP Header</h2><blockquote>
-<p>TCP Header由10个必需的字段组成 和 一个可选的字段组成:  </p>
+<p>TCP Header由10个必需的字段组成 和 一个可选的字段组成:</p>
+</blockquote>
 <ol>
-<li>Source port: (16 bits)<br>发送者的port number  </li>
-<li>Destination port: (16 bits)<br>接收者的port number</li>
-<li>Sequence number (32 bits)<br>Sequence number 有两个用途:<ul>
+<li>Source port: (16 bits)<blockquote>
+<p>发送者的port number</p>
+</blockquote>
+</li>
+<li>Destination port: (16 bits)<blockquote>
+<p>接收者的port number</p>
+</blockquote>
+</li>
+<li>Sequence number (32 bits)<blockquote>
+<p>Sequence number 有两个用途:  </p>
+<ul>
 <li>当SYN flag为 1， 那么 Sequence number就是 initial sequence number. 也就是此对话连接第一个字节所在segment的Sequence num </li>
 <li>当SYNC flag 为0， 那么这个Sequence number就是相对 initial sequence number 的计数</li>
 </ul>
+</blockquote>
 </li>
-<li>Acknowledgment number (32 bits)<br>当 ACK flag 被设置为 1 ，那么Acknowledgment number 就是发送端</li>
-<li>Data offset (4 bits)<br>记录TCP header的大小，TCP header最小是20 Bytes，最大是60 Bytes，因此 TCP header中可选字段可达40 Bytes大小。</li>
-<li>Reserved (3 bits)<br>保留未用</li>
-<li>Flags (9 bits) aka Control bits  </li>
-</ol>
+<li>Acknowledgment number (32 bits)<blockquote>
+<p>当 ACK flag 被设置为 1 ，那么Acknowledgment number 就是发送端</p>
+</blockquote>
+</li>
+<li>Data offset (4 bits)<blockquote>
+<p>记录TCP header的大小，TCP header最小是20 Bytes，最大是60 Bytes，因此 TCP header中可选字段可达40 Bytes大小。</p>
+</blockquote>
+</li>
+<li>Reserved (3 bits)<blockquote>
+<p>保留未用</p>
+</blockquote>
+</li>
+<li>Flags (9 bits) aka Control bits<blockquote>
 <ul>
 <li>NS(1 bit):</li>
 </ul>
 </blockquote>
+</li>
+</ol>
 
       
     </div>

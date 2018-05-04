@@ -77,20 +77,22 @@ TCP 从一个数据流中接收数据， 将数据分成很多个chunk，给每�
 {% asset_img wiki-tcp-header-structure.png%}
 
 ## TCP Header
-> TCP Header由10个必需的字段组成 和 一个可选的字段组成:  
-1. Source port: (16 bits)  
-发送者的port number  
-2. Destination port: (16 bits)  
-接收者的port number
-3. Sequence number (32 bits)  
-Sequence number 有两个用途:
+> TCP Header由10个必需的字段组成 和 一个可选的字段组成:
+
+
+1. Source port: (16 bits)
+    > 发送者的port number
+2. Destination port: (16 bits)
+    > 接收者的port number
+3. Sequence number (32 bits)
+    > Sequence number 有两个用途:  
     - 当SYN flag为 1， 那么 Sequence number就是 initial sequence number. 也就是此对话连接第一个字节所在segment的Sequence num 
     - 当SYNC flag 为0， 那么这个Sequence number就是相对 initial sequence number 的计数
-4. Acknowledgment number (32 bits)  
-当 ACK flag 被设置为 1 ，那么Acknowledgment number 就是发送端
-5. Data offset (4 bits)  
-记录TCP header的大小，TCP header最小是20 Bytes，最大是60 Bytes，因此 TCP header中可选字段可达40 Bytes大小。
+4. Acknowledgment number (32 bits)
+    > 当 ACK flag 被设置为 1 ，那么Acknowledgment number 就是发送端
+5. Data offset (4 bits)
+    > 记录TCP header的大小，TCP header最小是20 Bytes，最大是60 Bytes，因此 TCP header中可选字段可达40 Bytes大小。
 6. Reserved (3 bits)
-保留未用
-7. Flags (9 bits) aka Control bits  
-- NS(1 bit):
+    > 保留未用
+7. Flags (9 bits) aka Control bits
+    > - NS(1 bit):
