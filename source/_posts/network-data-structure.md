@@ -95,18 +95,24 @@ TCP 从一个数据流中接收数据， 将数据分成很多个chunk，给每�
 6. Reserved (3 bits)
     > 保留未用
 7. Flags (9 bits) aka Control bits
-    > - NS(1 bit):  实验性质，实际使用少  
-    > - CWR(1 bit): Congestion Window Reduced flag
-    > - URG(1 bit): 用于告知当前的数据是“紧急segment“，“紧急的segment”会被发送端立刻发出，  
+    > - NS:  实验性质，实际使用少  
+    > - CWR: Congestion Window Reduced flag
+    > - URG: 用于告知当前的数据是“紧急segment“，“紧急的segment”会被发送端立刻发出，  
     接收端收到后也会直接处理掉。无需等待之前的segment是否处理完。紧急segment常用的场景：　　
     当host在发送数据到远端的设备．如果突然一个问题出现，host需要远端设备立刻停止处理之前的数据　　
     这时候host就可以通过发送一个URG的segment来达到此目的了。
-    > - ACK(1 bit): 用于告知对方成功接收packet
-    > - PUSH(1 bit): 就像URG，PUSH存在的目的就是为了让segment在发送和接收端能够被优先处理掉  
+    > - ACK: 用于告知对方成功接收packet
+    > - PUSH: 就像URG，PUSH存在的目的就是为了让segment在发送和接收端能够被优先处理掉  
     > PUSH flag常用于数据传输的开始和结束阶段，同时影响到发送端和接收端的行为。
     > 当某个host发送数据的时候，他会暂时将数据queue在一个TCP buffer(一块特殊的memory)。  
     > TCP会一直等到buffer中的数据足够多，形成的segment的大小足够大才去发送出去。这样做的目的
     > 是为了保证每个segment的有效性，不至于发送过多的小空segment导致浪费带宽。  
     > 但是在某种特殊情况下data queue的行为反而不合适，例如在视频直播的时候，数据不需要buf，  
     > 以免出现视频被cut off的现象。
-    > - RST(1 bit): 当收到一个不该本链接收到的segment的时候，就会反馈一个RST flag
+    > - RST: 当收到一个不该本链接收到的segment的时候，就会反馈一个RST flag
+    > 常见的场景，是client要连接到host的时候，如果申请一个host并没有service的port，那么host就会
+    > 直接回一个RST，告知client无此服务，而且host也会单方面 reset 这个connection
+    > - SYN: 用于建立 3-way handshake between client and host
+    > - FIN: 用于结束connection。当双方数据交换完成后，就会出现FIN。
+    > 需要注意的是：当我方host需要关闭连接而发送了FIN给对方，但我方host仍然可继续接收数据，
+    > 直到对方也发送一个FIN，我方才会关闭连接，释放buffer。
