@@ -2,6 +2,8 @@
 title: Socket Ready Condition
 date: 2018-05-06 22:25:06
 tags:
+categories: 
+- Unix Network Programming
 ---
 # select返回的条件:
 ## read ready:
