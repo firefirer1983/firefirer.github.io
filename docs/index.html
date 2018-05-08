@@ -625,7 +625,10 @@ xrandr --output Virtual1 --mode &quot;1848x998_60.00&quot;
           
             <h1 id="IO-Models"><a href="#IO-Models" class="headerlink" title="IO Models"></a>IO Models</h1><h2 id="阻塞式IO"><a href="#阻塞式IO" class="headerlink" title="阻塞式IO"></a>阻塞式IO</h2><pre><code>int fd = socket(AF_INET, SOCK_STREAM, 0);  
 read(fd, buf, sizeof(buf));
-</code></pre><h2 id="非阻塞式IO"><a href="#非阻塞式IO" class="headerlink" title="非阻塞式IO"></a>非阻塞式IO</h2><h2 id="IO-复用"><a href="#IO-复用" class="headerlink" title="IO 复用"></a>IO 复用</h2><h2 id="信号驱动式IO"><a href="#信号驱动式IO" class="headerlink" title="信号驱动式IO"></a>信号驱动式IO</h2><h2 id="异步IO"><a href="#异步IO" class="headerlink" title="异步IO"></a>异步IO</h2>
+</code></pre><h2 id="非阻塞式IO"><a href="#非阻塞式IO" class="headerlink" title="非阻塞式IO"></a>非阻塞式IO</h2><h2 id="IO-复用"><a href="#IO-复用" class="headerlink" title="IO 复用"></a>IO 复用</h2><blockquote>
+<p>IO with buffer<br>当在 IO 复用的环境下使用 read/write buffer (fgets只返回其中一行，其余输入仍在stdin缓冲区)，因此一定会将问题复杂化，<br>根本原因是select/poll 无法得知buffer中的数据是否可读，而一直阻塞。</p>
+</blockquote>
+<h2 id="信号驱动式IO"><a href="#信号驱动式IO" class="headerlink" title="信号驱动式IO"></a>信号驱动式IO</h2><h2 id="异步IO"><a href="#异步IO" class="headerlink" title="异步IO"></a>异步IO</h2>
           
         
       
