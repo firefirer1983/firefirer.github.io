@@ -38,12 +38,13 @@ socketA 先通过 0.0.0.0.21 通配绑定后， socketB 需要绑定 192.168.1.1
 > 2. 对端回复RESET。说明对端进程已经重启，本端的应用程序应该关闭该连接。
 > 3. 没有对端的任何回复。则本端做重试，如果重试9次（前后重试间隔为75秒）仍然不可达，
 > 则向应用程序返回错误信息，ETIMEOUT（无任何应答）或EHOST
-
+<br>
     TCP_KEEPALIVE: on/off (default: on)  
     TCP_KEEPIDLE: seconds (default 7200s)  
     TCP_KEEINTVL: seconds (default 75s)
     TCP_KEEPCNT: retry count (default 9次)
-
+  
+  
 - SIOCGIFFLAGS, SIOCSIFFLAGS
 > 读取 或 设置 设备的 活动标志字
 
