@@ -229,6 +229,189 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/16/c-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fyman.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/firefirer.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="On Fire">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/firefirer.github.io/2018/05/16/c-features/" itemprop="url">C++ Features</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-16T10:23:00+08:00">
+                2018-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <pre><code>main
+</code></pre><h1 id="Non-Copyable-Class-不可复制赋值的类"><a href="#Non-Copyable-Class-不可复制赋值的类" class="headerlink" title="Non-Copyable Class (不可复制赋值的类)"></a>Non-Copyable Class (不可复制赋值的类)</h1><blockquote>
+<p>在实际开发中，某些特定的类，不希望客户拷贝复制此类对象，因这种类是“不可复制赋值类”</p>
+</blockquote>
+<ol>
+<li>boost里面有现成的，可直接继承就可： boost::noncopyable  </li>
+</ol>
+<pre><code>class Channel : boost::noncopyable
+{
+public:
+  typedef boost::function&lt;void()&gt; EventCallback;
+  typedef boost::function&lt;void(Timestamp)&gt; ReadEventCallback;
+</code></pre><ol start="2">
+<li>在std c11，需要用delete操作符明确的将此类的将赋值运算符删除，或者定义为private，用delete 比private更好，<br>因为意义更明确，而且不需要定义函数体：</li>
+</ol>
+<pre><code>delete:
+class Channel
+{
+public:
+  Channel operator=(const Channel &amp;ch) = delete; // 用delete函数将默认的赋值运算符删除
+
+  typedef boost::function&lt;void()&gt; EventCallback;
+  typedef boost::function&lt;void(Timestamp)&gt; ReadEventCallback;
+
+private:
+ class Channel
+ {
+ private:
+   Channel operator=(const Channel &amp;ch){}; // 用private限制函数访问域达到删除的效果
+ public:  
+   typedef boost::function&lt;void()&gt; EventCallback;
+   typedef boost::function&lt;void(Timestamp)&gt; ReadEventCallback;   
+</code></pre><h1 id="const-和-mutable"><a href="#const-和-mutable" class="headerlink" title="const 和 mutable"></a>const 和 mutable</h1><blockquote>
+<p>对象的状态：<br>一个对象的状态由其所有非静态数据成员的值构成 (静态成员不属于对象，属于类，所有对象共有)<br>因此，成员函数可能改变此对象的状态，如果声明一个成员函数为 const，则可以用编译检查的方式保证此<br>函数不会修改对象的状态</p>
+</blockquote>
+<pre><code>class Box {
+public:
+  unsigned Size() const {
+    return (width*height);
+  };
+private:
+  unsigned width;
+  unsigned height;
+}
+</code></pre><p>但是有些对象的数据成员，并不是表示对象状态的，例如mutex lock (block)，只是为了操作数据成员而存在(meta data<br>member)，因此在 const的函数里，如果要写此类数据成员，就需要将此类数据成员声明为 mutable 了，否则会编译失败:</p>
+<pre><code>class Box {
+public:
+  unsigned Size() const {
+    std::lock_gard&lt;std::mutex&gt; scopelock(block);
+    return (width*height);
+  };
+  unsigned SetWidth(unsigned w) {
+    std::lock_gard&lt;std::mutex&gt; scopelock(block);
+    width = w;
+  }
+  unsigned SetWidth(unsigned w) {
+    std::lock_gard&lt;std::mutex&gt; scopelock(block);
+    width = w;
+  }
+private:
+  mutable std::mutex block;
+  unsigned width;
+  unsigned height;
+}
+</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/11/socket-options/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1445,7 +1628,7 @@ or
               
                 <a href="/firefirer.github.io/archives/">
               
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
