@@ -229,6 +229,267 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/16/types-cast-in-cpp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fyman.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/firefirer.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="On Fire">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/firefirer.github.io/2018/05/16/types-cast-in-cpp/" itemprop="url">Types Cast In C++</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-16T22:04:56+08:00">
+                2018-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Cast-in-C"><a href="#Cast-in-C" class="headerlink" title="Cast in C++"></a>Cast in C++</h1><h2 id="static-cast-expressions"><a href="#static-cast-expressions" class="headerlink" title="static_cast(expressions);"></a>static_cast<to-type>(expressions);</to-type></h2><blockquote>
+<p><strong> static_cast </strong> 是最为常见的，用于转换基本类型和具有继承关系的类之间转换。<br>不太用于指针类型的之间的转换，他的效率没有reinterpret_cast的效率高。<br>该运算符把expressions转换为to_type类型，但没有运行时类型检查来保证转换的安全性。<br>它主要有如下几种用法：  </p>
+<ol>
+<li>用于类层次结构中基类和子类之间指针或引用的转换。<br><strong> up-cast </strong>（把子类的指针或引用转换成基类表示）是安全的。<br><strong> down-cast </strong>（把基类指针或引用转换成子类表示）时，由于没有动态类型检查，所以是不安全的。</li>
+<li>用于基本数据类型之间的转换，如把int转换成char，把int转换成enum。这种转换的安全性也要开发人员来保证。   </li>
+<li>把空指针转换成目标类型的空指针。</li>
+<li>把任何类型的表达式转换成void类型。<br><strong> 注意：static_cast不能转换掉expressions的const，volatile，或者__unaligned属性。 </strong></li>
+</ol>
+</blockquote>
+<ol>
+<li>类层次结构中基类和子类之间指针或引用的转换，既可以up-cast(SubClass -&gt; BaseClass)，也可以down-cast<br>(BaseClass -&gt; SubClass)    </li>
+</ol>
+<pre><code>class Shape {};
+class Circle: public Shape {
+}
+Shape *base = new Shape();
+Circle *circle = new Circle();
+base = static_cast&lt;Shape*&gt;(circle); // up-cast
+
+circle = static_cast&lt;Circle*&gt;(base); // down-cast
+</code></pre><ol start="2">
+<li>基本类型之间转换：</li>
+</ol>
+<pre><code>int i;
+char c;
+i = static_cast&lt;int&gt;(c);
+</code></pre><h2 id="implicit-cast-expressions"><a href="#implicit-cast-expressions" class="headerlink" title="implicit_cast(expressions);"></a>implicit_cast<to-type>(expressions);</to-type></h2><blockquote>
+<p>implicit_cast 只能进行up-cast，否则就编译报错：</p>
+</blockquote>
+<pre><code>template&lt;typename To, typename From&gt;
+inline To implicit_cast(From const &amp;f)
+{
+  return f;
+}
+</code></pre><p>例子：</p>
+<pre><code>class Shape{};
+class Circle:public Shape{};
+class Square:public Shape{};
+class Cake: public Circle,public Square{};
+void Cut(Circle &amp;c){
+  std::cout &lt;&lt; &quot;cut circle&quot; &lt;&lt; std::endl;
+}
+void Cut(Square &amp;s){
+  std::cout &lt;&lt; &quot;cut square&quot; &lt;&lt; std::endl;
+}
+int main(){
+  Shape shape;
+  Cake cake;
+  Cut(cake); //编译报错，因为不知道call那个Cut
+  Cut(static_cast&lt;Circle &amp;&gt;(cake)); // ok!
+  Cut(static_cast&lt;Square &amp;&gt;(cake)); // ok!
+  Cut(static_cast&lt;Shape &amp;&gt;(shape)); // 编译可以通过，但是由于是down-cast会有风险
+  Cut(implicity_cast&lt;Shape &amp;&gt;(shape)); // 编译无法通过，因为implicity-cast只能做up-cast
+  return 0;
+}
+</code></pre><h2 id="const-cast-expressions"><a href="#const-cast-expressions" class="headerlink" title="const_cast(expressions)"></a>const_cast<to-type>(expressions)</to-type></h2><blockquote>
+<p>用于去除指针变量的常属性，将它转换为一个对应指针类型的普通变量，反过来也可以将一个非常量指针转换为一个常量指针变量</p>
+</blockquote>
+<pre><code>class B{    
+  public:    
+  int num;    
+}    
+void foo(){    
+  const B b1;    
+  b1.num = 100; //comile error    
+  B b2 = const_cast&lt;B&gt;(b1);    
+  b2.num = 200; //fine    
+}    
+</code></pre><h2 id="reinterpret-cast-expressions"><a href="#reinterpret-cast-expressions" class="headerlink" title="reinterpret_cast(expressions)"></a>reinterpret_cast<to-type>(expressions)</to-type></h2><blockquote>
+<p>to-type必须是一个指针、引用、算术类型、函数指针或者成员指针。<br>  它可以把一个指针转换成一个整数，也可以把一个整数转换成一个指针（先把一个指针转换成一个整数，<br>  在把该整数转换成原类型的指针，还可以得到原先的指针值）。   </p>
+</blockquote>
+<blockquote>
+<p>两种情况下比较常见：<br>  1 需要直接操作内存的地方， 比如网络封包解包， 数据压缩加解密算法<br>  2 需要和c代码接口的地方</p>
+</blockquote>
+<p>  例如下面做hash的例子，任何一个数值的hash = 其地址值的高16位和原地址值的异或的结果。</p>
+<pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+// Returns a hash code based on an address
+unsigned short Hash( void *p ) {
+   unsigned int val = reinterpret_cast&lt;unsigned int&gt;( p );
+   return ( unsigned short )( val ^ (val &gt;&gt; 16));
+}
+
+using namespace std;
+int main() {
+   int a[10];
+   for ( int i = 0; i &lt; 10; i++ )
+      cout &lt;&lt; Hash( a + i ) &lt;&lt; endl;
+}
+
+Output: 
+64641
+64645
+64889
+64893
+64881
+64885
+64873
+64877
+64865
+64869
+</code></pre><h2 id="dynamic-cast-expressions"><a href="#dynamic-cast-expressions" class="headerlink" title="dynamic_cast(expressions)"></a>dynamic_cast<to-type>(expressions)</to-type></h2><blockquote>
+<p>该运算符把 expressions 转换成 to-type 类型的对象。to-type 必须是类的指针、类的引用或者void<br>如果to-type是类指针，那expressions必须是一个指针，如果to-type是一个引用，那expressions也必须是一个引用。<br>dynamic_cast主要用于类层次间的上行转换和下行转换，还可以用于类之间的交叉转换。<br>  在类层次间进行上行转换时，<br>  dynamic_cast和static_cast的效果是一样的；<br>  在进行下行转换时，dynamic_cast具有类型检查的功能，比static_cast更安全。</p>
+</blockquote>
+<ol>
+<li>只能在继承类对象的指针之间或引用之间进行类型转换</li>
+<li>这种转换并非在编译时，而是在运行时，动态的。</li>
+<li>没有继承关系，但被转换的类具有虚函数对象的指针进行转换  </li>
+</ol>
+<pre><code>class B{    
+  public:    
+  int num;
+  virtual void foo();    
+};    
+
+class D:public B{    
+public:    
+  char *name[100];    
+  void foo(){
+    std::cout &lt;&lt; name &lt;&lt; std::endl;
+  }
+};    
+
+void func(B *pb){
+  D *pd1 = static_cast&lt;D *&gt;(pb); // 不安全的
+
+  D *pd2 = dynamic_cast&lt;D *&gt;((pb);    
+  if(pd2){
+    pd2-&gt;foo(); // 安全的，因为动态转换检查
+  }
+}
+
+int main(int argc, char *argv[]){
+  B b;
+  D d;
+  func(&amp;d); // pd1 和 pd2都是一样的，而且是安全的;
+  func(&amp;b); // pd1是不安全的，而pd2为nullptr
+}
+</code></pre><blockquote>
+<p>另外要注意：B要有虚函数，否则会编译出错；static_cast则没有这个限制。<br>  这是由于运行时类型检查需要运行时类型信息，而这个信息存储在类的虚函数表中，只有定义了虚函数的类才有虚函数表，<br>  没有定义虚函数的类是没有虚函数表的。</p>
+</blockquote>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/16/c-features/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -412,6 +673,267 @@ private:
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/12/tcp-congestion-control/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fyman.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/firefirer.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="On Fire">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/firefirer.github.io/2018/05/12/tcp-congestion-control/" itemprop="url">tcp-congestion-control</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-12T10:29:40+08:00">
+                2018-05-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/12/mtu-mss/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fyman.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/firefirer.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="On Fire">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/firefirer.github.io/2018/05/12/mtu-mss/" itemprop="url">MTU MSS</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-12T08:56:28+08:00">
+                2018-05-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <img src="/firefirer.github.io/2018/05/12/mtu-mss/MTU-image-1.png" title="MTU and MSS">
+<h1 id="MTU-bytes"><a href="#MTU-bytes" class="headerlink" title="MTU( bytes ):"></a>MTU( bytes ):</h1><blockquote>
+<p>Maximum packet size allowed on an interface，MTU的值是单方设置的，每个interface设置一个MTU</p>
+</blockquote>
+<h2 id="Ethernet-default-MTU-1500-Bytes"><a href="#Ethernet-default-MTU-1500-Bytes" class="headerlink" title="Ethernet default MTU = 1500 Bytes"></a>Ethernet default MTU = 1500 Bytes</h2><p>MTU的值只是Ethernet Frame的数据段的值，Ethernet Frame加上 Header 和 FCS后就超过了1500 Bytes<br>通常 Ethernet的数据段就是一个 IP packet 了。<br>通常 MTU 的值为1500，但是可以设置MTU 为 9000，那么此时的 Ethernet Frame就称为Jumbo Frame</p>
+<ul>
+<li>Jumbo Frame的好处：  </li>
+</ul>
+<ol>
+<li>更少的over head，因为传输同样的数据量只需要更少的 Ethernet Frame Header</li>
+<li>接收端只需要处理较少的Frames</li>
+</ol>
+<ul>
+<li>缺点：  </li>
+</ul>
+<ol>
+<li>Fragmentation出现，当下游接收端的MTU设置为1524的时候，就无法接收Jumbo frames的时候，接收就需要分割Frames及加Headers</li>
+<li>需要更长的传输时间，可能会出现时延</li>
+<li>当出现错误的时候，重传的数据量更大</li>
+</ol>
+<h1 id="MSS-bytes"><a href="#MSS-bytes" class="headerlink" title="MSS( bytes )"></a>MSS( bytes )</h1><blockquote>
+<p>Maximum Segment Size of TCP，MSS的值是TCP协议中各传输端协商的值，是动态变化的。<br>通常MTU 为1500的话，MSS为1460，原因是：<br>ip headers: 20 bytes<br>tcp headers: 20 bytes<br>Ethernet frame MTU: 1500 = MSS + ip headers + tcp headers = 1460 + 20 + 20</p>
+</blockquote>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/11/socket-options/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -507,11 +1029,12 @@ private:
 <ol>
 <li>对端回复ACK。则本端TCP认为该连接依然存活。继续等7200s后再发送keepalive报文。  </li>
 <li>对端回复RESET。说明对端进程已经重启，本端的应用程序应该关闭该连接。</li>
-<li>没有对端的任何回复。则本端做重试，如果重试9次（前后重试间隔为75秒）仍然不可达，<br>则向应用程序返回错误信息，ETIMEOUT（无任何应答）或EHOST</li>
+<li>没有对端的任何回复。则本端做重试，如果重试9次（前后重试间隔为75秒）仍然不可达，<br>则向应用程序返回错误信息，ETIMEOUT（无任何应答）或EHOST<br><br><br>TCP_KEEPALIVE: on/off (default: on)<br>TCP_KEEPIDLE: seconds (default 7200s)<br>TCP_KEEINTVL: seconds (default 75s)<br>TCP_KEEPCNT: retry count (default 9次)</li>
 </ol>
 </blockquote>
-<p>  TCP_KEEPALIVE: on/off (default: on)<br>  TCP_KEEPIDLE: seconds (default 7200s)<br>  TCP_KEEINTVL: seconds (default 75s)<br>  TCP_KEEPCNT: retry count (default 9次)</p>
 </li>
+</ul>
+<ul>
 <li><p>SIOCGIFFLAGS, SIOCSIFFLAGS</p>
 <blockquote>
 <p>读取 或 设置 设备的 活动标志字</p>
@@ -1034,6 +1557,135 @@ read(fd, buf, sizeof(buf));
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/04/hello-world/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fyman.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/firefirer.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="On Fire">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/firefirer.github.io/2018/05/04/hello-world/" itemprop="url">Hexo Manual</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-04T20:42:24+08:00">
+                2018-05-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><strong>Main Page:</strong><br><a href="https://hexo.io/" target="_blank" rel="noopener">https://hexo.io/</a></p>
+<p><strong>Documentation:</strong><br><a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> </p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/04/network-data-structure/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1312,279 +1964,13 @@ read(fd, buf, sizeof(buf));
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/04/26/Template-C/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Fyman.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/firefirer.github.io/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="On Fire">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/firefirer.github.io/2018/04/26/Template-C/" itemprop="url">Template C++</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-26T12:38:08+08:00">
-                2018-04-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>###Template语法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt; templates &gt;</span><br></pre></td></tr></table></figure></p>
-<p>templates可为如下几种类型：</p>
-<ol>
-<li><p>class T/typename T</p>
-<pre><code>&lt;class T&gt; 
-or 
-&lt;typename U&gt;
-</code></pre></li>
-<li><p>A data type </p>
-</li>
-<li><p>An integral specification</p>
-</li>
-<li><p>An integral constant/pointer/reference which maps to spication mentioned above.</p>
-</li>
-</ol>
-<p>###Template的应用类型主要是以下两种:</p>
-<ul>
-<li><p>Function Template </p>
-</li>
-<li><p>Class Template</p>
-</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/04/26/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Fyman.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/firefirer.github.io/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="On Fire">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/firefirer.github.io/2018/04/26/hello-world/" itemprop="url">Hexo Manual</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-26T12:08:00+08:00">
-                2018-04-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><strong>Main Page:</strong><br><a href="https://hexo.io/" target="_blank" rel="noopener">https://hexo.io/</a></p>
-<p><strong>Documentation:</strong><br><a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> </p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/firefirer.github.io/page/2/">2</a><a class="extend next" rel="next" href="/firefirer.github.io/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -1628,7 +2014,7 @@ or
               
                 <a href="/firefirer.github.io/archives/">
               
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

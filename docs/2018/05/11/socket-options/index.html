@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="On Fire">
 <meta property="og:description" content="常用的Socket Options SO_REUSEADDR   当创建一个socket的时候，需要绑定 ip 和 port ， 可以通过通配绑定的方式，让某一个socket绑定多个ip或者多个port ，例如 0.0.0.0:21，就是绑定所有 ip上的 port 21。如果这样就会出现 指定绑定和通配绑定冲突的情况，例如：socketA 先通过 0.0.0.0.21 通配绑定后， socket">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-11T10:58:31.695Z">
+<meta property="og:updated_time" content="2018-05-11T16:09:12.801Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Socket Options">
 <meta name="twitter:description" content="常用的Socket Options SO_REUSEADDR   当创建一个socket的时候，需要绑定 ip 和 port ， 可以通过通配绑定的方式，让某一个socket绑定多个ip或者多个port ，例如 0.0.0.0:21，就是绑定所有 ip上的 port 21。如果这样就会出现 指定绑定和通配绑定冲突的情况，例如：socketA 先通过 0.0.0.0.21 通配绑定后， socket">
@@ -323,11 +323,12 @@
 <ol>
 <li>对端回复ACK。则本端TCP认为该连接依然存活。继续等7200s后再发送keepalive报文。  </li>
 <li>对端回复RESET。说明对端进程已经重启，本端的应用程序应该关闭该连接。</li>
-<li>没有对端的任何回复。则本端做重试，如果重试9次（前后重试间隔为75秒）仍然不可达，<br>则向应用程序返回错误信息，ETIMEOUT（无任何应答）或EHOST</li>
+<li>没有对端的任何回复。则本端做重试，如果重试9次（前后重试间隔为75秒）仍然不可达，<br>则向应用程序返回错误信息，ETIMEOUT（无任何应答）或EHOST<br><br><br>TCP_KEEPALIVE: on/off (default: on)<br>TCP_KEEPIDLE: seconds (default 7200s)<br>TCP_KEEINTVL: seconds (default 75s)<br>TCP_KEEPCNT: retry count (default 9次)</li>
 </ol>
 </blockquote>
-<p>  TCP_KEEPALIVE: on/off (default: on)<br>  TCP_KEEPIDLE: seconds (default 7200s)<br>  TCP_KEEINTVL: seconds (default 75s)<br>  TCP_KEEPCNT: retry count (default 9次)</p>
 </li>
+</ul>
+<ul>
 <li><p>SIOCGIFFLAGS, SIOCSIFFLAGS</p>
 <blockquote>
 <p>读取 或 设置 设备的 活动标志字</p>
@@ -389,8 +390,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/firefirer.github.io/2018/05/16/c-features/" rel="prev" title="C++ Features">
-                C++ Features <i class="fa fa-chevron-right"></i>
+              <a href="/firefirer.github.io/2018/05/12/mtu-mss/" rel="prev" title="MTU MSS">
+                MTU MSS <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -468,7 +469,7 @@
               
                 <a href="/firefirer.github.io/archives/">
               
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
