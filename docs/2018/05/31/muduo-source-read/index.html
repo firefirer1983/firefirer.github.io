@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="Ubuntu Settingscustomize resolution with xrandcvt 1848 998 60   // 查看 1848x998@60hz 的设置信息 # 1848x998 59.94 Hz (CVT) hsync: 62.09 kHz; pclk: 152.50 MHz Modeline &amp;quot;1848x998_60.00&amp;quot;  152.50  1848">
+<meta name="description" content="muduo 源码学习记录EventLoop 的核心代码： EventLoop，顾名思义就是事件循环，主要工作是完成poll到的Event的分发和处理 分发:  pollReturnTime_ = poller_-&amp;gt;poll(kPollTimeMs, &amp;amp;activeChannels_); 处理 currentActiveChannel_-&amp;gt;handleEvent(pollRetu">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Ubuntu Settings">
-<meta property="og:url" content="https://github.com/firefirer1983/firefirer.github.io/2018/05/07/ubuntu-settings/index.html">
+<meta property="og:title" content="Muduo Source Read">
+<meta property="og:url" content="https://github.com/firefirer1983/firefirer.github.io/2018/05/31/muduo-source-read/index.html">
 <meta property="og:site_name" content="On Fire">
-<meta property="og:description" content="Ubuntu Settingscustomize resolution with xrandcvt 1848 998 60   // 查看 1848x998@60hz 的设置信息 # 1848x998 59.94 Hz (CVT) hsync: 62.09 kHz; pclk: 152.50 MHz Modeline &amp;quot;1848x998_60.00&amp;quot;  152.50  1848">
+<meta property="og:description" content="muduo 源码学习记录EventLoop 的核心代码： EventLoop，顾名思义就是事件循环，主要工作是完成poll到的Event的分发和处理 分发:  pollReturnTime_ = poller_-&amp;gt;poll(kPollTimeMs, &amp;amp;activeChannels_); 处理 currentActiveChannel_-&amp;gt;handleEvent(pollRetu">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-08T11:50:57.590Z">
+<meta property="og:updated_time" content="2018-05-31T16:02:21.395Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Ubuntu Settings">
-<meta name="twitter:description" content="Ubuntu Settingscustomize resolution with xrandcvt 1848 998 60   // 查看 1848x998@60hz 的设置信息 # 1848x998 59.94 Hz (CVT) hsync: 62.09 kHz; pclk: 152.50 MHz Modeline &amp;quot;1848x998_60.00&amp;quot;  152.50  1848">
+<meta name="twitter:title" content="Muduo Source Read">
+<meta name="twitter:description" content="muduo 源码学习记录EventLoop 的核心代码： EventLoop，顾名思义就是事件循环，主要工作是完成poll到的Event的分发和处理 分发:  pollReturnTime_ = poller_-&amp;gt;poll(kPollTimeMs, &amp;amp;activeChannels_); 处理 currentActiveChannel_-&amp;gt;handleEvent(pollRetu">
 
 
 
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="https://github.com/firefirer1983/firefirer.github.io/2018/05/07/ubuntu-settings/"/>
+  <link rel="canonical" href="https://github.com/firefirer1983/firefirer.github.io/2018/05/31/muduo-source-read/"/>
 
 
 
 
 
-  <title>Ubuntu Settings | On Fire</title>
+  <title>Muduo Source Read | On Fire</title>
   
 
 
@@ -232,7 +232,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/07/ubuntu-settings/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/31/muduo-source-read/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Fyman.zhang">
@@ -249,7 +249,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Ubuntu Settings</h1>
+          <h1 class="post-title" itemprop="name headline">Muduo Source Read</h1>
         
 
         <div class="post-meta">
@@ -261,8 +261,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-07T09:57:43+08:00">
-                2018-05-07
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-31T23:36:13+08:00">
+                2018-05-31
               </time>
             
 
@@ -271,28 +271,6 @@
             
           </span>
 
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/firefirer.github.io/categories/ubuntu-settings/" itemprop="url" rel="index">
-                    <span itemprop="name">ubuntu settings</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
           
 
           
@@ -321,14 +299,95 @@
       
 
       
-        <h1 id="Ubuntu-Settings"><a href="#Ubuntu-Settings" class="headerlink" title="Ubuntu Settings"></a>Ubuntu Settings</h1><h2 id="customize-resolution-with-xrand"><a href="#customize-resolution-with-xrand" class="headerlink" title="customize resolution with xrand"></a>customize resolution with xrand</h2><pre><code>cvt 1848 998 60   // 查看 1848x998@60hz 的设置信息
-# 1848x998 59.94 Hz (CVT) hsync: 62.09 kHz; pclk: 152.50 MHz
-Modeline &quot;1848x998_60.00&quot;  152.50  1848 1960 2152 2456  998 1001 1011 1036 -hsync +vsync
-xrandr --newmode &quot;1848x998_60.00&quot;  152.50  1848 1960 2152 2456  998 1001 1011 1036 -hsync +vsync
-xrandr --addmode Virtual1 &quot;1848x998_60.00&quot;
-xrandr --output Virtual1 --mode &quot;1848x998_60.00&quot;
-最后将后面3条xrandr语句写入到 ~/.xprofile就可以
-</code></pre>
+        <h1 id="muduo-源码学习记录"><a href="#muduo-源码学习记录" class="headerlink" title="muduo 源码学习记录"></a>muduo 源码学习记录</h1><h2 id="EventLoop-的核心代码："><a href="#EventLoop-的核心代码：" class="headerlink" title="EventLoop 的核心代码："></a>EventLoop 的核心代码：</h2><ol>
+<li><p>EventLoop，顾名思义就是事件循环，主要工作是完成poll到的Event的分发和处理</p>
+<pre><code>分发: 
+pollReturnTime_ = poller_-&gt;poll(kPollTimeMs, &amp;activeChannels_);
+处理
+currentActiveChannel_-&gt;handleEvent(pollReturnTime_);
+
+void EventLoop::loop()
+{
+  assert(!looping_);
+  assertInLoopThread();
+  looping_ = true;
+  quit_ = false;  // FIXME: what if someone calls quit() before loop() ?
+  LOG_TRACE &lt;&lt; &quot;EventLoop &quot; &lt;&lt; this &lt;&lt; &quot; start looping&quot;;
+
+  while (!quit_)
+  {
+    activeChannels_.clear();
+    pollReturnTime_ = poller_-&gt;poll(kPollTimeMs, &amp;activeChannels_);
+    ++iteration_;
+    if (Logger::logLevel() &lt;= Logger::TRACE)
+    {
+      printActiveChannels();
+    }
+    // TODO sort channel by priority
+    eventHandling_ = true;
+    for (ChannelList::iterator it = activeChannels_.begin();
+        it != activeChannels_.end(); ++it)
+    {
+      currentActiveChannel_ = *it;
+      currentActiveChannel_-&gt;handleEvent(pollReturnTime_);
+    }
+    currentActiveChannel_ = NULL;
+    eventHandling_ = false;
+    doPendingFunctors();
+  }
+
+  LOG_TRACE &lt;&lt; &quot;EventLoop &quot; &lt;&lt; this &lt;&lt; &quot; stop looping&quot;;
+  looping_ = false;
+}
+</code></pre></li>
+<li><p>消息的来源有三种：</p>
+</li>
+</ol>
+<ul>
+<li>来自sock 的 POLLIN / POLLOUT / POLLHUP 等event：用于socket的 nonblock read/write</li>
+<li>来自timefd 的readable event: 用于timer functor的定时执行</li>
+<li><p>来之 eventfd 的消息：用于唤醒loop，doPendingFunctor</p>
+<blockquote>
+<p>任何一个Channel对象在call update的时候，都会将自身的fd加到所属loop的poller的pollfds_队列里，以后poller就<br>会负责监控此fd的的 POLLIN / POLLOUT / POLLHUP 等event：PollPoller::updateChannel</p>
+</blockquote>
+<pre><code>void PollPoller::updateChannel(Channel* channel)
+{
+  Poller::assertInLoopThread();
+  LOG_TRACE &lt;&lt; &quot;fd = &quot; &lt;&lt; channel-&gt;fd() &lt;&lt; &quot; events = &quot; &lt;&lt; channel-&gt;events();
+  if (channel-&gt;index() &lt; 0)
+  {
+    // a new one, add to pollfds_
+    assert(channels_.find(channel-&gt;fd()) == channels_.end());
+    struct pollfd pfd;
+    pfd.fd = channel-&gt;fd();
+    pfd.events = static_cast&lt;short&gt;(channel-&gt;events());
+    pfd.revents = 0;
+    pollfds_.push_back(pfd);
+    int idx = static_cast&lt;int&gt;(pollfds_.size())-1;
+    channel-&gt;set_index(idx);
+    channels_[pfd.fd] = channel;
+  }
+  else
+  {
+    // update existing one
+    assert(channels_.find(channel-&gt;fd()) != channels_.end());
+    assert(channels_[channel-&gt;fd()] == channel);
+    int idx = channel-&gt;index();
+    assert(0 &lt;= idx &amp;&amp; idx &lt; static_cast&lt;int&gt;(pollfds_.size()));
+    struct pollfd&amp; pfd = pollfds_[idx];
+    assert(pfd.fd == channel-&gt;fd() || pfd.fd == -channel-&gt;fd()-1);
+    pfd.events = static_cast&lt;short&gt;(channel-&gt;events());
+    pfd.revents = 0;
+    if (channel-&gt;isNoneEvent())
+    {
+      // ignore this pollfd
+      pfd.fd = -channel-&gt;fd()-1;
+    }
+  }
+}
+</code></pre></li>
+</ul>
+
       
     </div>
     
@@ -352,8 +411,8 @@ xrandr --output Virtual1 --mode &quot;1848x998_60.00&quot;
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/firefirer.github.io/2018/05/06/socket-ready-condition/" rel="next" title="Socket Ready Condition">
-                <i class="fa fa-chevron-left"></i> Socket Ready Condition
+              <a href="/firefirer.github.io/2018/05/28/a-tour-in-cpp/" rel="next" title="A Tour in C++">
+                <i class="fa fa-chevron-left"></i> A Tour in C++
               </a>
             
           </div>
@@ -361,10 +420,6 @@ xrandr --output Virtual1 --mode &quot;1848x998_60.00&quot;
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/firefirer.github.io/2018/05/11/socket-options/" rel="prev" title="Socket Options">
-                Socket Options <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -487,7 +542,7 @@ xrandr --output Virtual1 --mode &quot;1848x998_60.00&quot;
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Ubuntu-Settings"><span class="nav-number">1.</span> <span class="nav-text">Ubuntu Settings</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#customize-resolution-with-xrand"><span class="nav-number">1.1.</span> <span class="nav-text">customize resolution with xrand</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#muduo-源码学习记录"><span class="nav-number">1.</span> <span class="nav-text">muduo 源码学习记录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#EventLoop-的核心代码："><span class="nav-number">1.1.</span> <span class="nav-text">EventLoop 的核心代码：</span></a></li></ol></li></ol></div>
             
 
           </div>

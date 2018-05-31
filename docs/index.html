@@ -229,6 +229,213 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/31/muduo-source-read/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fyman.zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/firefirer.github.io/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="On Fire">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/firefirer.github.io/2018/05/31/muduo-source-read/" itemprop="url">Muduo Source Read</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-31T23:36:13+08:00">
+                2018-05-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="muduo-源码学习记录"><a href="#muduo-源码学习记录" class="headerlink" title="muduo 源码学习记录"></a>muduo 源码学习记录</h1><h2 id="EventLoop-的核心代码："><a href="#EventLoop-的核心代码：" class="headerlink" title="EventLoop 的核心代码："></a>EventLoop 的核心代码：</h2><ol>
+<li><p>EventLoop，顾名思义就是事件循环，主要工作是完成poll到的Event的分发和处理</p>
+<pre><code>分发: 
+pollReturnTime_ = poller_-&gt;poll(kPollTimeMs, &amp;activeChannels_);
+处理
+currentActiveChannel_-&gt;handleEvent(pollReturnTime_);
+
+void EventLoop::loop()
+{
+  assert(!looping_);
+  assertInLoopThread();
+  looping_ = true;
+  quit_ = false;  // FIXME: what if someone calls quit() before loop() ?
+  LOG_TRACE &lt;&lt; &quot;EventLoop &quot; &lt;&lt; this &lt;&lt; &quot; start looping&quot;;
+
+  while (!quit_)
+  {
+    activeChannels_.clear();
+    pollReturnTime_ = poller_-&gt;poll(kPollTimeMs, &amp;activeChannels_);
+    ++iteration_;
+    if (Logger::logLevel() &lt;= Logger::TRACE)
+    {
+      printActiveChannels();
+    }
+    // TODO sort channel by priority
+    eventHandling_ = true;
+    for (ChannelList::iterator it = activeChannels_.begin();
+        it != activeChannels_.end(); ++it)
+    {
+      currentActiveChannel_ = *it;
+      currentActiveChannel_-&gt;handleEvent(pollReturnTime_);
+    }
+    currentActiveChannel_ = NULL;
+    eventHandling_ = false;
+    doPendingFunctors();
+  }
+
+  LOG_TRACE &lt;&lt; &quot;EventLoop &quot; &lt;&lt; this &lt;&lt; &quot; stop looping&quot;;
+  looping_ = false;
+}
+</code></pre></li>
+<li><p>消息的来源有三种：</p>
+</li>
+</ol>
+<ul>
+<li>来自sock 的 POLLIN / POLLOUT / POLLHUP 等event：用于socket的 nonblock read/write</li>
+<li>来自timefd 的readable event: 用于timer functor的定时执行</li>
+<li><p>来之 eventfd 的消息：用于唤醒loop，doPendingFunctor</p>
+<blockquote>
+<p>任何一个Channel对象在call update的时候，都会将自身的fd加到所属loop的poller的pollfds_队列里，以后poller就<br>会负责监控此fd的的 POLLIN / POLLOUT / POLLHUP 等event：PollPoller::updateChannel</p>
+</blockquote>
+<pre><code>void PollPoller::updateChannel(Channel* channel)
+{
+  Poller::assertInLoopThread();
+  LOG_TRACE &lt;&lt; &quot;fd = &quot; &lt;&lt; channel-&gt;fd() &lt;&lt; &quot; events = &quot; &lt;&lt; channel-&gt;events();
+  if (channel-&gt;index() &lt; 0)
+  {
+    // a new one, add to pollfds_
+    assert(channels_.find(channel-&gt;fd()) == channels_.end());
+    struct pollfd pfd;
+    pfd.fd = channel-&gt;fd();
+    pfd.events = static_cast&lt;short&gt;(channel-&gt;events());
+    pfd.revents = 0;
+    pollfds_.push_back(pfd);
+    int idx = static_cast&lt;int&gt;(pollfds_.size())-1;
+    channel-&gt;set_index(idx);
+    channels_[pfd.fd] = channel;
+  }
+  else
+  {
+    // update existing one
+    assert(channels_.find(channel-&gt;fd()) != channels_.end());
+    assert(channels_[channel-&gt;fd()] == channel);
+    int idx = channel-&gt;index();
+    assert(0 &lt;= idx &amp;&amp; idx &lt; static_cast&lt;int&gt;(pollfds_.size()));
+    struct pollfd&amp; pfd = pollfds_[idx];
+    assert(pfd.fd == channel-&gt;fd() || pfd.fd == -channel-&gt;fd()-1);
+    pfd.events = static_cast&lt;short&gt;(channel-&gt;events());
+    pfd.revents = 0;
+    if (channel-&gt;isNoneEvent())
+    {
+      // ignore this pollfd
+      pfd.fd = -channel-&gt;fd()-1;
+    }
+  }
+}
+</code></pre></li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/28/a-tour-in-cpp/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1679,152 +1886,6 @@ xrandr --output Virtual1 --mode &quot;1848x998_60.00&quot;
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/firefirer1983/firefirer.github.io/firefirer.github.io/2018/05/06/io-models/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Fyman.zhang">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/firefirer.github.io/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="On Fire">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/firefirer.github.io/2018/05/06/io-models/" itemprop="url">IO Models</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-06T17:29:57+08:00">
-                2018-05-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/firefirer.github.io/categories/Unix-Network-Programming/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix Network Programming</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="IO-Models"><a href="#IO-Models" class="headerlink" title="IO Models"></a>IO Models</h1><h2 id="阻塞式IO"><a href="#阻塞式IO" class="headerlink" title="阻塞式IO"></a>阻塞式IO</h2><pre><code>int fd = socket(AF_INET, SOCK_STREAM, 0);  
-read(fd, buf, sizeof(buf));
-</code></pre><h2 id="非阻塞式IO"><a href="#非阻塞式IO" class="headerlink" title="非阻塞式IO"></a>非阻塞式IO</h2><h2 id="IO-复用"><a href="#IO-复用" class="headerlink" title="IO 复用"></a>IO 复用</h2><blockquote>
-<p>IO with buffer<br>当在 IO 复用的环境下使用 read/write buffer (fgets只返回其中一行，其余输入仍在stdin缓冲区)，因此一定会将问题复杂化，<br>根本原因是select/poll 无法得知buffer中的数据是否可读，而一直阻塞。</p>
-</blockquote>
-<h2 id="信号驱动式IO"><a href="#信号驱动式IO" class="headerlink" title="信号驱动式IO"></a>信号驱动式IO</h2><h2 id="异步IO"><a href="#异步IO" class="headerlink" title="异步IO"></a>异步IO</h2>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1875,7 +1936,7 @@ read(fd, buf, sizeof(buf));
               
                 <a href="/firefirer.github.io/archives/">
               
-                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
