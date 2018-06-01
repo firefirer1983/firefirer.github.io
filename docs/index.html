@@ -307,28 +307,24 @@ pollReturnTime_ = poller_-&gt;poll(kPollTimeMs, &amp;activeChannels_);
 处理
 currentActiveChannel_-&gt;handleEvent(pollReturnTime_);
 
-void EventLoop::loop()
-{
+void EventLoop::loop() {
   assert(!looping_);
   assertInLoopThread();
   looping_ = true;
   quit_ = false;  // FIXME: what if someone calls quit() before loop() ?
   LOG_TRACE &lt;&lt; &quot;EventLoop &quot; &lt;&lt; this &lt;&lt; &quot; start looping&quot;;
 
-  while (!quit_)
-  {
+  while (!quit_) {
     activeChannels_.clear();
     pollReturnTime_ = poller_-&gt;poll(kPollTimeMs, &amp;activeChannels_);
     ++iteration_;
-    if (Logger::logLevel() &lt;= Logger::TRACE)
-    {
+    if (Logger::logLevel() &lt;= Logger::TRACE) {
       printActiveChannels();
     }
     // TODO sort channel by priority
     eventHandling_ = true;
     for (ChannelList::iterator it = activeChannels_.begin();
-        it != activeChannels_.end(); ++it)
-    {
+        it != activeChannels_.end(); ++it) {
       currentActiveChannel_ = *it;
       currentActiveChannel_-&gt;handleEvent(pollReturnTime_);
     }
@@ -336,7 +332,6 @@ void EventLoop::loop()
     eventHandling_ = false;
     doPendingFunctors();
   }
-
   LOG_TRACE &lt;&lt; &quot;EventLoop &quot; &lt;&lt; this &lt;&lt; &quot; stop looping&quot;;
   looping_ = false;
 }
@@ -349,14 +344,12 @@ void EventLoop::loop()
 <li>来自timefd 的readable event: 用于timer functor的定时执行</li>
 <li><p>来之 eventfd 的消息：用于唤醒loop，doPendingFunctor</p>
 <blockquote>
-<p>任何一个Channel对象在call update的时候，都会将自身的fd加到所属loop的poller的pollfds_队列里，以后poller就<br>会负责监控此fd的的 POLLIN / POLLOUT / POLLHUP 等event：PollPoller::updateChannel</p>
+<p>任何一个Channel对象在call update的时候，都会将自身的fd加到所属loop的poller的pollfds_队列里，以后poller就<br>  会负责监控此fd的的 POLLIN / POLLOUT / POLLHUP 等event：PollPoller::updateChannel</p>
 </blockquote>
-<pre><code>void PollPoller::updateChannel(Channel* channel)
-{
+<pre><code>void PollPoller::updateChannel(Channel* channel) {
   Poller::assertInLoopThread();
   LOG_TRACE &lt;&lt; &quot;fd = &quot; &lt;&lt; channel-&gt;fd() &lt;&lt; &quot; events = &quot; &lt;&lt; channel-&gt;events();
-  if (channel-&gt;index() &lt; 0)
-  {
+  if (channel-&gt;index() &lt; 0) {
     // a new one, add to pollfds_
     assert(channels_.find(channel-&gt;fd()) == channels_.end());
     struct pollfd pfd;
@@ -367,9 +360,7 @@ void EventLoop::loop()
     int idx = static_cast&lt;int&gt;(pollfds_.size())-1;
     channel-&gt;set_index(idx);
     channels_[pfd.fd] = channel;
-  }
-  else
-  {
+  } else {
     // update existing one
     assert(channels_.find(channel-&gt;fd()) != channels_.end());
     assert(channels_[channel-&gt;fd()] == channel);
@@ -379,8 +370,7 @@ void EventLoop::loop()
     assert(pfd.fd == channel-&gt;fd() || pfd.fd == -channel-&gt;fd()-1);
     pfd.events = static_cast&lt;short&gt;(channel-&gt;events());
     pfd.revents = 0;
-    if (channel-&gt;isNoneEvent())
-    {
+    if (channel-&gt;isNoneEvent()) {
       // ignore this pollfd
       pfd.fd = -channel-&gt;fd()-1;
     }
@@ -388,6 +378,170 @@ void EventLoop::loop()
 }
 </code></pre></li>
 </ul>
+<ol start="3">
+<li><p>poll event 处理流程：</p>
+<blockquote>
+<p>poll event -&gt; Channel -&gt; TcpConnection -&gt; TcpClient</p>
+</blockquote>
+<ol>
+<li><p>poll event -&gt; Channel</p>
+<pre><code>POLLHUP &amp;&amp; !POLLIN -&gt; Channel::closeCallback_()
+POLLERR || POLLNVAL -&gt; Channel::errorCallback_()
+POLLIN || POLLPRI || POLLRDHUP -&gt; Channel::readCallback_()
+POLLOUT -&gt; Channel::writeCallback_()
+
+void setReadCallback(const ReadEventCallback&amp; cb)
+{ readCallback_ = cb; }
+void setWriteCallback(const EventCallback&amp; cb)
+{ writeCallback_ = cb; }
+void setCloseCallback(const EventCallback&amp; cb)
+{ closeCallback_ = cb; }
+void setErrorCallback(const EventCallback&amp; cb)
+{ errorCallback_ = cb; }
+</code></pre></li>
+<li><p>Channel -&gt; TcpConnection</p>
+<pre><code>Channel::closeCallback_() -&gt; TcpConnection::handleClose()
+Channel::errorCallback_() -&gt; TcpConnection::handleError()
+Channel::readCallback_() -&gt; TcpConnection::handleRead()
+Channel::writeCallback_() -&gt; TcpConnection::handleWrite()
+
+TcpConnection::TcpConnection(EventLoop* loop,
+                             const string&amp; nameArg,
+                             int sockfd,
+                             const InetAddress&amp; localAddr,
+                             const InetAddress&amp; peerAddr)
+  : loop_(CHECK_NOTNULL(loop)),
+    name_(nameArg),
+    state_(kConnecting),
+    socket_(new Socket(sockfd)),
+    channel_(new Channel(loop, sockfd)),
+    localAddr_(localAddr),
+    peerAddr_(peerAddr),
+    highWaterMark_(64*1024*1024),
+    reading_(true)
+{
+  channel_-&gt;setReadCallback(
+      std::bind(&amp;TcpConnection::handleRead, this, std::placeholders::_1));
+  channel_-&gt;setWriteCallback(
+      std::bind(&amp;TcpConnection::handleWrite, this));
+  channel_-&gt;setCloseCallback(
+      std::bind(&amp;TcpConnection::handleClose, this));
+  channel_-&gt;setErrorCallback(
+      std::bind(&amp;TcpConnection::handleError, this));
+  LOG_DEBUG &lt;&lt; &quot;TcpConnection::ctor[&quot; &lt;&lt;  name_ &lt;&lt; &quot;] at &quot; &lt;&lt; this
+            &lt;&lt; &quot; fd=&quot; &lt;&lt; sockfd;
+  socket_-&gt;setKeepAlive(true);
+}
+</code></pre></li>
+<li><p>TcpConnection -&gt; TcpClient()</p>
+<ol>
+<li>TcpConnection::handleClose() -&gt; closeCallback_(guardThis); -&gt; TcpClient::removeConnection</li>
+</ol>
+<ul>
+<li>channel_-&gt;disableAll()  </li>
+<li>connectionCallback_(guardThis);  </li>
+<li><p>closeCallback_(guardThis);</p>
+<pre><code>void TcpConnection::handleClose()
+{
+  loop_-&gt;assertInLoopThread();
+  LOG_TRACE &lt;&lt; &quot;fd = &quot; &lt;&lt; channel_-&gt;fd() &lt;&lt; &quot; state = &quot; &lt;&lt; stateToString();
+  assert(state_ == kConnected || state_ == kDisconnecting);
+  // we don&apos;t close fd, leave it to dtor, so we can find leaks easily.
+  setState(kDisconnected);
+  channel_-&gt;disableAll();
+
+  TcpConnectionPtr guardThis(shared_from_this());
+  connectionCallback_(guardThis);
+  // must be the last line
+  closeCallback_(guardThis);
+}
+</code></pre></li>
+</ul>
+<ol start="2">
+<li><p>TcpConnection::handleError()</p>
+<pre><code>void TcpConnection::handleError()
+{
+  int err = sockets::getSocketError(channel_-&gt;fd());
+  LOG_ERROR &lt;&lt; &quot;TcpConnection::handleError [&quot; &lt;&lt; name_
+            &lt;&lt; &quot;] - SO_ERROR = &quot; &lt;&lt; err &lt;&lt; &quot; &quot; &lt;&lt; strerror_tl(err);
+}
+</code></pre></li>
+<li><p>TcpConnection::handleWrite() -&gt; writeCompleteCallback_()</p>
+</li>
+</ol>
+<ul>
+<li>sockets::write       </li>
+<li><p>writeCompleteCallback_</p>
+<pre><code>void TcpConnection::handleWrite() {
+  loop_-&gt;assertInLoopThread();
+  if (channel_-&gt;isWriting()) {
+    ssize_t n = sockets::write(channel_-&gt;fd(),
+                               outputBuffer_.peek(),
+                               outputBuffer_.readableBytes());
+    if (n &gt; 0) {
+      outputBuffer_.retrieve(n);
+      if (outputBuffer_.readableBytes() == 0) {
+        channel_-&gt;disableWriting();
+        if (writeCompleteCallback_) {
+          loop_-&gt;queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
+        }
+        if (state_ == kDisconnecting) {
+          shutdownInLoop();
+        }
+      }
+    }
+    else {
+      LOG_SYSERR &lt;&lt; &quot;TcpConnection::handleWrite&quot;;
+    }
+  } else {
+    LOG_TRACE &lt;&lt; &quot;Connection fd = &quot; &lt;&lt; channel_-&gt;fd()
+              &lt;&lt; &quot; is down, no more writing&quot;;
+  }
+}
+</code></pre></li>
+</ul>
+<ol start="4">
+<li>TcpConnection::handleRead() -&gt; messageCallback()</li>
+</ol>
+<ul>
+<li>inputBuffer_.readFd(channel_-&gt;fd(), &amp;savedErrno);  </li>
+<li>messageCallback_(shared_from_this(), &amp;inputBuffer_, receiveTime);</li>
+<li><p>handleClose();</p>
+<pre><code>void TcpConnection::handleRead(Timestamp receiveTime) {
+  loop_-&gt;assertInLoopThread();
+  int savedErrno = 0;
+  ssize_t n = inputBuffer_.readFd(channel_-&gt;fd(), &amp;savedErrno);
+  if (n &gt; 0) {
+    messageCallback_(shared_from_this(), &amp;inputBuffer_, receiveTime);
+  } else if (n == 0) {
+    handleClose();
+  } else {
+    errno = savedErrno;
+    LOG_SYSERR &lt;&lt; &quot;TcpConnection::handleRead&quot;;
+    handleError();
+  }
+}
+</code></pre></li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<ol start="4">
+<li>TcpClient connect的流程<ol>
+<li>创建 Connector 做实际的connect逻辑： connector_(new Connector(loop, serverAddr))</li>
+<li>设置 Connector 的 newConnection 处理 Callback，Connector::newConnection 返回一个TcpConnection<br>对象。</li>
+<li>在 newConnection 里面注册 TcpConnection的几个处理Callback：  </li>
+</ol>
+<ul>
+<li>conn-&gt;setConnectionCallback(connectionCallback_);</li>
+<li>conn-&gt;setMessageCallback(messageCallback_);</li>
+<li>conn-&gt;setWriteCompleteCallback(writeCompleteCallback_);</li>
+<li>conn-&gt;setCloseCallback(std::bind(&amp;TcpClient::removeConnection, this, std::placeholders::_1));<br>最后在newConnection的末尾通知 TcpConnection 对象，连接已经建立完成：</li>
+<li>conn-&gt;connectEstablished();</li>
+</ul>
+</li>
+</ol>
 
           
         
