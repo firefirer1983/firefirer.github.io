@@ -673,6 +673,20 @@ TcpConnection::TcpConnection(EventLoop* loop,
 <li>“=”</li>
 <li>{}: 这种方式是以花括号，将一个初始化值列表包括起来</li>
 </ol>
+<h3 id="作用域和生命周期："><a href="#作用域和生命周期：" class="headerlink" title="作用域和生命周期："></a>作用域和生命周期：</h3><p>声明语句把一个名字引入他的作用域中：</p>
+<ul>
+<li>局部作用域：域大小是由 {} 包括起来的块，函数参数也属于局部作用域。</li>
+<li>类作用域：一个名字定义在类内部，同时位于任何函数，lambda，enum class的外部</li>
+<li>命名空间作用域：如果一个名字定义在命名空间内部，同事位于任何函数，lambda，enum class的外部。</li>
+<li>声明在上述所有的结构之外的名字为全局作用域</li>
+</ul>
+<h3 id="常量"><a href="#常量" class="headerlink" title="常量"></a>常量</h3><ul>
+<li>const： 编译器负责确认并执行不变的承诺。</li>
+<li>constexpr： “在编译时求值” 。 允许把数据置于只读内存中，以防被破坏，以及提升性能</li>
+</ul>
+<p>如果某个函数被用在常量表达式( const expression )中，该表达式在编译时求值，则这个函数必须定义为constexpr<br>例如：</p>
+<pre><code>constexpr double square(double x) { return x*x; }
+</code></pre><p>想要定义为constexpr，函数必须非常简单：函数中仅有一条计算某个值的return 语句。</p>
 
           
         
