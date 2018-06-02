@@ -687,7 +687,32 @@ TcpConnection::TcpConnection(EventLoop* loop,
 <p>如果某个函数被用在常量表达式( const expression )中，该表达式在编译时求值，则这个函数必须定义为constexpr<br>例如：</p>
 <pre><code>constexpr double square(double x) { return x*x; }
 </code></pre><p>想要定义为constexpr，函数必须非常简单：函数中仅有一条计算某个值的return 语句。</p>
-
+<h3 id="指针，数组，引用"><a href="#指针，数组，引用" class="headerlink" title="指针，数组，引用"></a>指针，数组，引用</h3><ul>
+<li>xxx[]表示 xxx的数组</li>
+<li>xxx* 表示 指向 xxx</li>
+<li>xxx&amp; 表示 xxx的引用，一个引用初始化后不能再引用其他对象了。</li>
+</ul>
+<p>数组里的元素遍历的新方法 range-for：</p>
+<pre><code>int v[]={0,1,2,3,4,5,6,7,8,9};
+for(auto x:v)
+  cout &lt;&lt; x &lt;&lt; endl;
+</code></pre><p>如果我们不希望将v的值拷贝到变量x中，而只是让x引用一个元素：</p>
+<pre><code>int v[]={0,1,2,3,4,5,6,7,8,9};
+for(auto &amp;x:v)
+  cout &lt;&lt; x &lt;&lt; endl;
+</code></pre><p>func 通过把参数 r 类型定义为 int 引用，在调用 func(int &amp;r) 函数的时候就不必把实参拷贝给形参。<br>在调用 func(my_val) 的是，就直接在 my_val上执行操作。</p>
+<p>如果既不想修改实参内容，由希望节省参数拷贝的的代价，可以用 const 引用</p>
+<h2 id="用户自定义类型"><a href="#用户自定义类型" class="headerlink" title="用户自定义类型"></a>用户自定义类型</h2><h3 id="内置类型"><a href="#内置类型" class="headerlink" title="内置类型"></a>内置类型</h3><p>由const，基本类型 (int, char, short , double) ，声明运算符([], * , &amp;) 三种构造出来的类型，称为内置类型(build-in type)</p>
+<h3 id="自定义类型"><a href="#自定义类型" class="headerlink" title="自定义类型"></a>自定义类型</h3><p>由c++的抽象机制构建的新类型，称为用户自定义类型(user-defined type)，诸如 class 和 enum</p>
+<h3 id="new-delete-操作符"><a href="#new-delete-操作符" class="headerlink" title="new / delete 操作符"></a>new / delete 操作符</h3><p>new 运算符从一块名为(动态内存 dynamic memory，或叫 堆 heap) 的区域中分配一段内存空间。分配的内存独立于它所在<br>的作用域，会一直” 存活 “到使用 delete运算符销毁它为止。</p>
+<pre><code>int *m = new int;   // 从堆中分配大小为sizeof(int)的内存空间，并且将内存空间的地址值赋值给m
+int *a = new int[10];// 从堆中分配大小为 10*sizeof(int)的内存空间，并且将内存空间的地址值赋值给 a
+int &amp;m = *(new int); // m 是从堆中分配大小为sizeof(int)的内存空间的引用
+int &amp;a = *(new int[10]); // a 是从堆中分配的大小为 10*sizeof(int)大小空间的首个元素的引用
+a = 5;
+m = 5;
+static_assert(sizeof(*(new int)) == sizeof(*(new int[10])), &quot;is the same&quot;);
+</code></pre><h3 id="自定义类型-struct-class-enum"><a href="#自定义类型-struct-class-enum" class="headerlink" title="自定义类型 : struct, class , enum"></a>自定义类型 : struct, class , enum</h3><h4 id="与所属类同名的函数，称为-构造函数。构造函数是用来构造类对象的。"><a href="#与所属类同名的函数，称为-构造函数。构造函数是用来构造类对象的。" class="headerlink" title="与所属类同名的函数，称为 构造函数。构造函数是用来构造类对象的。"></a>与所属类同名的函数，称为 构造函数。构造函数是用来构造类对象的。</h4>
           
         
       
