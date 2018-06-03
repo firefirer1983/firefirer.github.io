@@ -72,13 +72,177 @@ new 运算符从一块名为(动态内存 dynamic memory，或叫 堆 heap) 的�
     
     
     int *m = new int;   // 从堆中分配大小为sizeof(int)的内存空间，并且将内存空间的地址值赋值给m
-    int *a = new int[10];// 从堆中分配大小为 10*sizeof(int)的内存空间，并且将内存空间的地址值赋值给 a
+    int *a = new int[10];// 从堆中分配大小为 10*sizeof(int)的内存空间，并且将其首个元素的内存地址值赋值给 a
     int &m = *(new int); // m 是从堆中分配大小为sizeof(int)的内存空间的引用
     int &a = *(new int[10]); // a 是从堆中分配的大小为 10*sizeof(int)大小空间的首个元素的引用
     a = 5;
     m = 5;
     static_assert(sizeof(*(new int)) == sizeof(*(new int[10])), "is the same");
 
-### 自定义类型 : struct, class , enum
+### 自定义类型 : struct/class , enum, union
 
-#### 与所属类同名的函数，称为 构造函数。构造函数是用来构造类对象的。
+
+
+#### 类 class/struct  ：
+与所属类同名的函数，称为 构造函数。构造函数是用来构造类对象的。
+> 类的目的构造一个功能模块，实现功能的 ** 接口 ** 和 ** 实现 ** 分离。  
+接口(代码可对外访问部分) : public
+实现(代码不可对外访问部分，主要用于构造本功能) : private
+
+#### 联合 union
+union是一种特殊的struct，所有成员都被分配在同一块内存区域中。因此union所占的内存空间就是它最大成员所占的空间
+而且，同一时刻 union只能保存一个成员的值
+
+#### 枚举 enum
+1. 裸的枚举类型
+
+        enum {red, yellow, green
+
+2. 类中的枚举类型：
+    
+        enum class Color{red, yellow, green};
+        enum class TraficLigth{red, yellow, green};
+        
+枚举值位于class的作用域内，就可以在不同的enum class中重复使用这些枚举值而不致引起混淆例如：
+
+    Color x = Color::red;
+    Color y = TrafficLight::red;
+
+默认情况下，enum class只定义了赋值，初始化 和比较( == 和 < ) 操作，然而，既然枚举类型是一种用户自定义类型
+那么我们就可以为它定义别的运算符：
+
+    TrafficLight& operator++(TrafficLight &t) {
+      switch(t){
+      case TrafficLight::green: return t=TrafficLight::yellow;
+      case TrafficLight::yellow: return t=TrafficLight::red;
+      case TrafficLight::red: return t=TrafficLight::green;
+      }
+    }
+    
+    TrafficLight now = TrafficLight::red;
+    TrafficLight next = now ++; // next == TrafficLight::green
+    
+## 模块化
+- 引言
+- 分离编译
+- 命名空间
+
+### 引言
+模块化的第一步是通过类来分离接口和实现，同时声明在*.h，定义在*.cpp
+
+### 分离编译
+用户代码(*.h)只可见类型和函数接口
+头文件的作用是描述接口和强调逻辑结构的。
+
+
+### 命名空间
+命名空间机制，一方面表达某些声明式属于一个整体的，同时不会跟其他命名空间中的冲突。
+
+### 错误处理
+错误处理内容远超语言特性层面，而应归结为程序设计技术和工具范畴。
+#### 异常(exception)
+功能的作者一般不知道出现异常的时候用户(使用者)希望怎么处理，同时用户(使用者)不能保证每次都能正确使用功能
+> 最佳的解决方案是由功能实现者负责检测，并且将异常情况通知使用者。
+
+throw负责把程序的控制权从异常发生处转移到异常处理代码。
+为了实现这一目标，异常实现部分需要解开(unwind)函数调用栈以便返回主调用函数的上下文。
+异常处理机制把程序的控制权从当前作用域转移到处理该类型错误的代码，** 有必要的时候调用析构函数 **
+
+把一个永远不会抛出异常的函数声明为noexcept，一旦真的发生错误，函数user还是会抛出异常，此时标准库函数
+terminate()立即终止当前程序执行。
+
+    void user(int sz) noexcept {
+      std::vector(sz);
+    }
+
+
+不变式
+> 对于类来说，一条假定某事为真的声明成为类的不变式(class invariant)，建立不变式是构造函数的任务，从而成员函数
+可以依赖于该不变式，另一个作用是确保当前函数提出时不变式仍然成立。
+
+#### 静态断言
+异常和普通断言负责报告运行时错误，编译时错误可用静态断言来检查。
+
+    static_assert(4<=sizeof(int), "integers size are too small");
+    
+
+## 类
+- 引言
+- 具体类型
+- 抽象类型
+- 虚函数
+- 类层次结构
+- 拷贝和移动
+- 建议
+
+
+C++ 最核心的语言特性就是类(class)，类有三种 ：
+1. 具体类
+2. 抽象类
+3. 模板类
+4. 类层次结构中的类
+
+### 具体类：
+- 基本思想是它们的行为"就像内置类型一样"
+- 有自己确定的语义和操作集合
+
+我们应该把简单的操作设置为内联的。也就是这些操作不应该以函数调用的方式实现。
+** 定义在类内部的函数默认是内联的，我们也可以在函数声明前加上inline关键字，从而显示指定为内联。
+
+默认构造函数：
+> 无需实参就可以调用的构造函数称为默认构造函数(default constructor)
+
+如果很多函数并不需要直接访问成员变量，可以将这些函数和类的定义分离。
+
+#### 容器：是指一个包含若干元素的对象。
+
+析构函数：
+> 一种以确保构造函数分配的内存一档会被销毁的机制。
+
+构造函数和析构函数的存在意义：
+1. 一些值的初始化，可在构造函数内自动执行赋值行为。
+2. 当类内部的成员是在堆上分配(new)，那么在构造函数new，析构函数 delete实现资源自动申请和回收。(RAII)
+
+数据句柄模型(handle-to-data model): 用来管理在对象生命周期中大小会发生变化的数据。在构造函数中获取资源，  
+然后在西沟函数中释放，这种技术称为(RAII：Resource Acquisition Is Initialization)。
+
+试想，如果一个类里面所有的成员都是从栈上分配内存空间的，那么默认就是RAII的。
+但是当类有从堆上分配资源，那么就需要用RAII的技术更好的去管理资源。(避免手动调用new/delete，或者叫裸new/delete)
+
+#### 初始化容器
+- 初始值列表构造函数(initializer-list constructor): 使用元素列表进行初始化
+- push_back(): 类似函数
+
+    class Container {
+    public:
+      Container(std::initializer_list<double>); // 使用一个double值列表进行初始化。
+      void push_back(double); //在末尾添加一个元素，容器长度 +1
+    };
+    
+std::initializer_list是一种标准库类型，编译器可以辨识它：
+** 当我们使用 {} 列表的时候，如 {1,2,3,4}，编译器就会创建一个initializer_list类型的对象并将其提供给程序。
+
+Container::Container(std::initializer_list<double> lst)
+  :elem_(new double[lst.size], sz(static_cast<int>(lst.size)))
+{
+  std::copy(lst.begin(), lst.end(), elem);
+}
+
+### 抽象类型(接口类型)
+Container类型之所以被称为具体类型，是因为他们的实现属于定义的一部分。在这点上与内置类型相似。
+抽象类型则把使用者与类的实现细节完全隔离出来：
+
+    class Container {
+    public:
+      virtual double& operator[](int) = 0; // 纯虚函数
+      virtual int size() const = 0; // 常量成员函数
+      virtual ~Container() {}    //析构函数
+    };
+    
+> 因为我们对抽象类型一无所知，所以必须从 heap 上位对象分配空间，然后通过引用或指针访问对象。  
+> 上面这个类纯粹是个接口。关键字virtual的意思是 "可能在随后的派生类中被重新定义"。  
+> 纯虚函数意味着Container的派生类必须定义这个函数，因此不能单纯定义一个Container对象，Container只能作为  
+> 接口出现，派生类负责具体实现size, operator[]函数，*** 含有纯虚函数的类称为抽象类 ***
+
+- 作为一个抽象类，不需要提供构造函数，毕竟它不需要初始化数据和获取资源。
+- 另一方面，抽象类必须有一个virual的析构函数，  因为需要执行派生类的具体析构函数来释放资源。
