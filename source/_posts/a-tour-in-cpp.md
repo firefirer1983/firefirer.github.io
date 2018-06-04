@@ -228,7 +228,7 @@ Container::Container(std::initializer_list<double> lst)
   std::copy(lst.begin(), lst.end(), elem);
 }
 
-### 抽象类型(接口类型)
+### 抽象类型(接口类型) 含有纯虚函数的类，称为抽象类
 Container类型之所以被称为具体类型，是因为他们的实现属于定义的一部分。在这点上与内置类型相似。
 抽象类型则把使用者与类的实现细节完全隔离出来：
 
@@ -246,3 +246,49 @@ Container类型之所以被称为具体类型，是因为他们的实现属于�
 
 - 作为一个抽象类，不需要提供构造函数，毕竟它不需要初始化数据和获取资源。
 - 另一方面，抽象类必须有一个virual的析构函数，  因为需要执行派生类的具体析构函数来释放资源。
+
+
+
+### 类层次结构
+class 派生类 : 基类 {
+};
+
+class 子类： 超类 {
+};
+
+
+    void use(Container &c)
+    {
+      const int sz = c.size();
+      for(int i=0; i!=sz; ++i)
+        printf("%f ",c[i]);
+    }
+    
+    class Vector : public Container {
+    public:
+      double &operator[](int i){ return v[i]; }
+      size_t size(){ return sz_; }
+    private:
+      std::vector;
+    };
+
+    int main(int argc, char *argv[])
+    {
+      Vector v{1,2,3,4,5};
+      use(vc);
+    }
+    
+    
+灵活性背后唯一不足的是我们只能通过引用或者指针操作对象。
+
+#### 显式覆盖
+如果派生类的某个函数与基类中虚函数的名字和类型都相同，则派生类的版本会覆盖基类中的版本。
+可以用 override的指令显式的指明一个函数是否覆盖其基类的函数：
+
+    void draw() const override;
+    
+当这个函数找不到其基类可覆盖的函数的时候，就会产生编译错误。
+
+#### 层次结构的益处
+- 派生类对象可以用在任何使用基类对象的地方
+- 实现继承：

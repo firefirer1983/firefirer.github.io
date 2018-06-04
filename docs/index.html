@@ -812,7 +812,7 @@ void push_back(double); //在末尾添加一个元素，容器长度 +1
 </ul>
 <p>std::initializer_list是一种标准库类型，编译器可以辨识它：<br>** 当我们使用 {} 列表的时候，如 {1,2,3,4}，编译器就会创建一个initializer_list类型的对象并将其提供给程序。</p>
 <p>Container::Container(std::initializer_list<double> lst)<br>  :elem_(new double[lst.size], sz(static_cast<int>(lst.size)))<br>{<br>  std::copy(lst.begin(), lst.end(), elem);<br>}</int></double></p>
-<h3 id="抽象类型-接口类型"><a href="#抽象类型-接口类型" class="headerlink" title="抽象类型(接口类型)"></a>抽象类型(接口类型)</h3><p>Container类型之所以被称为具体类型，是因为他们的实现属于定义的一部分。在这点上与内置类型相似。<br>抽象类型则把使用者与类的实现细节完全隔离出来：</p>
+<h3 id="抽象类型-接口类型-含有纯虚函数的类，称为抽象类"><a href="#抽象类型-接口类型-含有纯虚函数的类，称为抽象类" class="headerlink" title="抽象类型(接口类型) 含有纯虚函数的类，称为抽象类"></a>抽象类型(接口类型) 含有纯虚函数的类，称为抽象类</h3><p>Container类型之所以被称为具体类型，是因为他们的实现属于定义的一部分。在这点上与内置类型相似。<br>抽象类型则把使用者与类的实现细节完全隔离出来：</p>
 <pre><code>class Container {
 public:
   virtual double&amp; operator[](int) = 0; // 纯虚函数
@@ -825,6 +825,36 @@ public:
 <ul>
 <li>作为一个抽象类，不需要提供构造函数，毕竟它不需要初始化数据和获取资源。</li>
 <li>另一方面，抽象类必须有一个virual的析构函数，  因为需要执行派生类的具体析构函数来释放资源。</li>
+</ul>
+<h3 id="类层次结构"><a href="#类层次结构" class="headerlink" title="类层次结构"></a>类层次结构</h3><p>class 派生类 : 基类 {<br>};</p>
+<p>class 子类： 超类 {<br>};</p>
+<pre><code>void use(Container &amp;c)
+{
+  const int sz = c.size();
+  for(int i=0; i!=sz; ++i)
+    printf(&quot;%f &quot;,c[i]);
+}
+
+class Vector : public Container {
+public:
+  double &amp;operator[](int i){ return v[i]; }
+  size_t size(){ return sz_; }
+private:
+  std::vector;
+};
+
+int main(int argc, char *argv[])
+{
+  Vector v{1,2,3,4,5};
+  use(vc);
+}
+</code></pre><p>灵活性背后唯一不足的是我们只能通过引用或者指针操作对象。</p>
+<h4 id="显式覆盖"><a href="#显式覆盖" class="headerlink" title="显式覆盖"></a>显式覆盖</h4><p>如果派生类的某个函数与基类中虚函数的名字和类型都相同，则派生类的版本会覆盖基类中的版本。<br>可以用 override的指令显式的指明一个函数是否覆盖其基类的函数：</p>
+<pre><code>void draw() const override;
+</code></pre><p>当这个函数找不到其基类可覆盖的函数的时候，就会产生编译错误。</p>
+<h4 id="层次结构的益处"><a href="#层次结构的益处" class="headerlink" title="层次结构的益处"></a>层次结构的益处</h4><ul>
+<li>派生类对象可以用在任何使用基类对象的地方</li>
+<li>实现继承：</li>
 </ul>
 
           
