@@ -853,10 +853,32 @@ int main(int argc, char *argv[])
 <pre><code>void draw() const override;
 </code></pre><p>当这个函数找不到其基类可覆盖的函数的时候，就会产生编译错误。</p>
 <h4 id="层次结构的益处"><a href="#层次结构的益处" class="headerlink" title="层次结构的益处"></a>层次结构的益处</h4><ul>
-<li>派生类对象可以用在任何使用基类对象的地方</li>
-<li>实现继承：</li>
+<li>接口继承：派生类对象可以用在任何使用基类对象的地方</li>
+<li>实现继承：基类负责提供可以简化派生类实现的函数或者数据。</li>
 </ul>
-
+<ol>
+<li><p>具体类，尤其是表现形式不复杂的类，其行为非常类似于内置类型</p>
+<blockquote>
+<p>将其定义为局部变量，通过名字访问，随意拷贝  </p>
+</blockquote>
+</li>
+<li><p>层次结构中的类：</p>
+<blockquote>
+<p>倾向于通过new来分配空间，然后通过指针或者引用访问。</p>
+</blockquote>
+</li>
+</ol>
+<h4 id="层次结构漫游："><a href="#层次结构漫游：" class="headerlink" title="层次结构漫游："></a>层次结构漫游：</h4><p>如果基类指针要使用派生类的函数，就必须用dynamic_cast做转换，再检测后使用 </p>
+<pre><code>Shape *ps = read_shape(cin);
+Smiley *p = dynamic_cast&lt;Smiley*&gt;(ps);
+if(p) {
+  p.wink();
+}
+</code></pre><h4 id="避免资源泄漏"><a href="#避免资源泄漏" class="headerlink" title="避免资源泄漏"></a>避免资源泄漏</h4><ul>
+<li>应该用unique_ptr来管理，将new的指针存放在unique_ptr里面管理 </li>
+</ul>
+<h3 id="拷贝和移动"><a href="#拷贝和移动" class="headerlink" title="拷贝和移动"></a>拷贝和移动</h3><p>当设计一个类时候，必须仔细考虑对象是否会被拷贝以及如何拷贝的问题。</p>
+<h4 id="拷贝容器"><a href="#拷贝容器" class="headerlink" title="拷贝容器"></a>拷贝容器</h4>
           
         
       
