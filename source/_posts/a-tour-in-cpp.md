@@ -461,4 +461,99 @@ value_tupe 和 constexpr，除了类型参数，模板还可以接受普通的�
       constexpr int size() { return N; }
       T[N];
     }
+ 
+ 
+### 概念和泛型编程
+模板提供了以下功能：
+- 把类型(以及数值 和 模板)作为实参传递而不损失任何信息的能力。这为内联提供了很多便利，现有的实现可利用这点。
+- 延迟类型检查(在实例化时执行)。意味着程序可以把多个上下文的有用信息捏合在一起。
+- 把常量值作为实参传递的能力，也就是提供编译时计算能力。
+> 总而言之，模板为** 编译时计算 ** 和 ** 类型控制 **提供了强力的辅助支持，是我们可以编写更加简洁高效的代码。
+
+### 函数对象
+模板的一个特殊用途就是函数对象(functor)，我们可以像使用一个函数那样使用对象：
+例如：
     
+    template <typename T>
+    class LessThan{
+    public:
+        LessThan(const T &v) :
+                val(v){
+        }
+        bool operator()(const T &c) const {
+            return (c < val);
+        }
+    
+    private:
+        const T val;
+    };
+
+用于指明通用算法的关键操作含义的函数对象 (如lessThan 之于 count())，被称为 策略对象(policy object)又叫
+(higher order object)
+
+如果觉得将定义和使用分离比较麻烦，可以用lamda表达式：
+
+    [&](int a){ return a < x; }
+    
+[&]: 是一个捕获列表(capture list)，它指明所用的局部变量名字(如x)将通过引用访问，如果我们只希望捕获 x，
+则可以写成： 
+
+    [&x](int a){ return a<x; }
+
+[=x]: 希望给生成的函数对象传递一个x的拷贝
+    
+    [=x](int a){ return a < x; }
+    
+[]: 什么都不捕获
+
+### 可变参数模板 (variadic template)
+template<typename T, typename... Tail>
+void f(T head, Tail... tail) {
+  g(head);
+  f(tail...);
+}
+
+> 省略号... 表示列表的 "剩余部分" 。最终tail会变为空，我们需要另外一个函数处理空：
+template<>
+void f(){
+
+}
+
+### 别名
+很多情况下，我们应该为类型或者模板引入一个同义词。例如 
+using size_t = unsigned int;
+
+实际上，每个标准库容器都提供了value_type作为其值类型的名字，这样我们编写的代码就能在任何一个服从这种规范的
+容器上工作了：
+    
+    template<typename C>
+    using ElementType = typename C::value_type;
+
+
+通过绑定某些或者全部模板实参，我们就能使用别名机制定义新的模板了：
+
+    template<typename Key, typename Value>
+    class Map{
+      // ...
+    };
+    
+    template<typename Value>
+    using StringMap = Map<string,Value>
+    
+    StringMap<int> m; // m是一个 Map<string, int>
+    
+## 标准库概览
+### 标准库组件
+- 运行时语言支持(例如，对资源分配和运行时类型信息的支持)
+- C标准库
+- 字符串(包括国际字符和本地化的支持)
+- 正则表达式的支持
+- I/O流，可扩展的输入输出框架，用户可向其中添加自己设计的类型，流，缓冲策略，区域设定和字符集。
+- 容器(std::vector std::map)和算法(std::find, std::sort)
+- 数值计算的支持(标准数学函数，复数，向量及随机数发生器)
+- 并发程序设计支持(thread, mutex, condition)
+- 支持模板元程序设计的工具，STL风格的泛型程序设计(pair)
+- 资源管理的 "智能指针" unique_ptr, shared_ptr, weak_ptr
+- 特殊用途容器 如 array,bitset,tuple
+本质上，C++标准库提供了最常用的基本数据结构及其上的基础算法
+

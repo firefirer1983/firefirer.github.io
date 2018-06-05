@@ -994,6 +994,68 @@ private:
   size_t sz_;
 };
 </code></pre><p>value_tupe 和 constexpr，除了类型参数，模板还可以接受普通的值参数，例如下面的N<br>    template<typename t,="" int="" n=""><br>    struct Buffer {<br>      using value_type = T;<br>      constexpr int size() { return N; }<br>      T[N];<br>    }</typename></p>
+<h3 id="概念和泛型编程"><a href="#概念和泛型编程" class="headerlink" title="概念和泛型编程"></a>概念和泛型编程</h3><p>模板提供了以下功能：</p>
+<ul>
+<li>把类型(以及数值 和 模板)作为实参传递而不损失任何信息的能力。这为内联提供了很多便利，现有的实现可利用这点。</li>
+<li>延迟类型检查(在实例化时执行)。意味着程序可以把多个上下文的有用信息捏合在一起。</li>
+<li>把常量值作为实参传递的能力，也就是提供编译时计算能力。<blockquote>
+<p>总而言之，模板为<strong> 编译时计算 </strong> 和 <strong> 类型控制 </strong>提供了强力的辅助支持，是我们可以编写更加简洁高效的代码。</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="函数对象"><a href="#函数对象" class="headerlink" title="函数对象"></a>函数对象</h3><p>模板的一个特殊用途就是函数对象(functor)，我们可以像使用一个函数那样使用对象：<br>例如：</p>
+<pre><code>template &lt;typename T&gt;
+class LessThan{
+public:
+    LessThan(const T &amp;v) :
+            val(v){
+    }
+    bool operator()(const T &amp;c) const {
+        return (c &lt; val);
+    }
+
+private:
+    const T val;
+};
+</code></pre><p>用于指明通用算法的关键操作含义的函数对象 (如lessThan 之于 count())，被称为 策略对象(policy object)又叫<br>(higher order object)</p>
+<p>如果觉得将定义和使用分离比较麻烦，可以用lamda表达式：</p>
+<pre><code>[&amp;](int a){ return a &lt; x; }
+</code></pre><p>[&amp;]: 是一个捕获列表(capture list)，它指明所用的局部变量名字(如x)将通过引用访问，如果我们只希望捕获 x，<br>则可以写成： </p>
+<pre><code>[&amp;x](int a){ return a&lt;x; }
+</code></pre><pre><code>[=x](int a){ return a &lt; x; }
+</code></pre><p>[]: 什么都不捕获</p>
+<h3 id="可变参数模板-variadic-template"><a href="#可变参数模板-variadic-template" class="headerlink" title="可变参数模板 (variadic template)"></a>可变参数模板 (variadic template)</h3><p>template<typename t,="" typename...="" tail=""><br>void f(T head, Tail… tail) {<br>  g(head);<br>  f(tail…);<br>}</typename></p>
+<blockquote>
+<p>省略号… 表示列表的 “剩余部分” 。最终tail会变为空，我们需要另外一个函数处理空：<br>template&lt;&gt;<br>void f(){</p>
+</blockquote>
+<p>}</p>
+<h3 id="别名"><a href="#别名" class="headerlink" title="别名"></a>别名</h3><p>很多情况下，我们应该为类型或者模板引入一个同义词。例如<br>using size_t = unsigned int;</p>
+<p>实际上，每个标准库容器都提供了value_type作为其值类型的名字，这样我们编写的代码就能在任何一个服从这种规范的<br>容器上工作了：</p>
+<pre><code>template&lt;typename C&gt;
+using ElementType = typename C::value_type;
+</code></pre><p>通过绑定某些或者全部模板实参，我们就能使用别名机制定义新的模板了：</p>
+<pre><code>template&lt;typename Key, typename Value&gt;
+class Map{
+  // ...
+};
+
+template&lt;typename Value&gt;
+using StringMap = Map&lt;string,Value&gt;
+
+StringMap&lt;int&gt; m; // m是一个 Map&lt;string, int&gt;
+</code></pre><h2 id="标准库概览"><a href="#标准库概览" class="headerlink" title="标准库概览"></a>标准库概览</h2><h3 id="标准库组件"><a href="#标准库组件" class="headerlink" title="标准库组件"></a>标准库组件</h3><ul>
+<li>运行时语言支持(例如，对资源分配和运行时类型信息的支持)</li>
+<li>C标准库</li>
+<li>字符串(包括国际字符和本地化的支持)</li>
+<li>正则表达式的支持</li>
+<li>I/O流，可扩展的输入输出框架，用户可向其中添加自己设计的类型，流，缓冲策略，区域设定和字符集。</li>
+<li>容器(std::vector std::map)和算法(std::find, std::sort)</li>
+<li>数值计算的支持(标准数学函数，复数，向量及随机数发生器)</li>
+<li>并发程序设计支持(thread, mutex, condition)</li>
+<li>支持模板元程序设计的工具，STL风格的泛型程序设计(pair)</li>
+<li>资源管理的 “智能指针” unique_ptr, shared_ptr, weak_ptr</li>
+<li>特殊用途容器 如 array,bitset,tuple<br>本质上，C++标准库提供了最常用的基本数据结构及其上的基础算法</li>
+</ul>
 
           
         
