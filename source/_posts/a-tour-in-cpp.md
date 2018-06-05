@@ -316,3 +316,149 @@ class 子类： 超类 {
 当设计一个类时候，必须仔细考虑对象是否会被拷贝以及如何拷贝的问题。
 
 #### 拷贝容器
+默认的 拷贝构造 和 拷贝赋值，都是按照每个类成员的值拷贝的。这种拷贝方式将违反资源句柄的不变式
+
+类对象的拷贝，如果不想使用默认的每个成员的值拷贝，就必须要自定义 ** 拷贝构造函数 ** 与 ** 拷贝赋值运算符 **
+
+    class Vector {
+    public:
+      // 默认构造函数
+      Vector(std::initializer_list<double> lst): 
+        sz_(lst.size()),
+        ary_(new doulbe[sz_])
+      {
+      
+      }
+      
+      ~Vector(){
+        delete[] ary_;
+        sz_ = 0;
+      }
+      
+      // 拷贝构造函数
+      Vector(const Vector &v) { 
+        sz_ = v.sz_;  
+        ary_ = new double[sz_];
+        std::copy(ary_, ary_+sz_, v.ary_);
+      }
+      
+      // 拷贝赋值运算符
+      void operator=(const Vector &v) {
+        sz_ = v.sz_;  
+        ary_ = new double[sz_];
+        std::copy(ary_, ary_+sz_, v.ary_);
+      }
+      
+      size_t size() {
+        return sz_;
+      }
+      
+    priavate:
+      double *ary_;
+      size_ sz_;
+    };
+    
+#### 基本操作
+构造函数，析构函数，拷贝操作，移动操作 在逻辑上有千丝万缕的联系，在定义这些函数时我们必须考虑这种内在的
+联系，否则就会遇到逻辑问题或者性能问题。
+> 如果类X的析构函数执行了某些特定的任务，比如释放自 heap空间或者释放锁，则该类也应该实现所有的其他相关函数：
+
+    class X {
+      X(Sometype); // 普通构造函数
+      X(); // 默认构造函数
+      X(const X&); // 拷贝构造函数
+      X(X &&); // 移动构造函数
+      X& operator=(const X&); // 赋值拷贝运算符，清空目标对象并拷贝
+      X& operator=(X &&); // 移动赋值运算符，清空目标对象并移动
+      ~X();  // 析构函数，清空资源
+
+编译器会根据需要生成上面的成员函数(普通构造函数除外)。 如果程序员希望显式使用函数的默认实现
+
+下面5中情况下，对象会被移动或拷贝
+- 被赋值给其他对象： 
+
+    Vector a({1,2,3});
+    Vector b({4,5,6);
+    a = b; // 赋值拷贝运算符
+    
+- 作为对象初始值：
+
+    Vector a({1,2,3});
+    Vector b(a); // 拷贝构造函数
+
+- 作为函数实参：
+
+    void show(Vector v) {
+      
+    }
+
+
+#### 资源管理
+广义的资源：
+> 任何具有  获取 -> 使用 -> 释放 模式的东西，都可以称为资源。
+> 例如 内存，锁，套接字，文件句柄，线程句柄 都可以算为资源。同时任何无法同时使用的硬件，也能抽象为资源。
+
+通过 move，移动构造运算符，移动赋值运算符，unique_ptr  
+
+#### 抑制操作
+处于层次结构的类，使用默认的拷贝或者移动操作常常意味着风险：因为基类指针是无法了解派生类有什么成员。
+因此最好是删除了默认的拷贝和移动操作：
+    
+    class Shape {
+    public:
+      Shape(const Shape &) = delete;
+      Shape &operator=(const Shape&) = delete;
+      
+      Shape(Shape &&) = delete;
+      Shape& operator=(Shape &&) = delete;
+      
+      
+## 模板
+### 引言
+> 模板：用一组类型或值，对其进行参数化的一个类或者一个函数。
+
+一个模板及模板参数的集合，被称为实例化。
+** 每个程序使用的实例化代码，是在编译后期，也就是实例化期才产生的 **
+
+    template<typename T>
+    class Vector {
+    public:
+      Vecotr(const std::initializer_list<T> &lst):
+            sz_(lst.size()),
+            ary_(new T[lst.size()])
+      {
+        int i = 0;
+        for(auto &m:lst) {
+          ary_[i] = m;
+          ++ i;
+        }
+      }
+      
+      Vector(const Vector &v):
+            sz_(v.sz_),
+            ary_(new T[v.sz_]
+      {
+        int i = 0;
+        for(const T &m:v) {
+          ary_[i] = m;
+        }
+        ++ i;
+      }
+      ~Vector() {
+        delete[] ary_;
+        sz_ = 0;
+      }
+      
+    private:
+      T *ary_;
+      size_t sz_;
+    };
+    
+value_tupe 和 constexpr，除了类型参数，模板还可以接受普通的值参数，例如下面的N
+    template<typename T, int N>
+    struct Buffer {
+      using value_type = T;
+      constexpr int size() { return N; }
+      T[N];
+    }
+    
