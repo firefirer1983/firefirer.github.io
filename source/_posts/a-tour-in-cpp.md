@@ -650,5 +650,84 @@ smatch matches： smatch实际上是一个string的vector，每个string 保存�
     ^   行开始; 非
     $   行结束
     
+    {n}      严格重复n次         (times == n)
+    {n,}     重复n次或更多次     ( times >= n )
+    {n,m}    至少重复n次，最多m次 ( times >= n , times <= m )
+    *        重复0次或多次(任意次数)
+    +        重复 1次或者多次  (>= 1)
+    ?        重复0，或者一次  ( times == 0 || times == 1 )
+
+匹配模式总是查找最长匹配，这就是所谓的** 最长匹配法则 ** ， 但是如果在任何重复符号后面放一个?后缀，会使匹配  
+器变得"懒惰，不贪心"，而是查找最短匹配。
+
+    例如：(ab)* 和 (ab)*?
+    regex pat{R"(ab)*"};
+    regex_search(string("ababababab", matches, pat));
     
+＾放在集合［］的开头，表示非，其他位置则表示普通的 ^ 字符
     
+    例如:
+     [^aeiouy] : 匹配非元音字符 (b,c,d ...)
+     [a^eiouy] : 配合元音字符或 ^ 字符
+     
+### 迭代器
+regex_iterator遍历一个流(字符序列)
+
+## I/O 流
+I/O 流库提供了文本和数值的输入输出功能，这种输入输出是带缓冲的，可以是格式化，也可以是未格式化的。
+
+- 在<ostream>中，I/O流库为所有的** 内置类型 **都定义了输出操作
+- 用户自定义类型定义输出操作也很简单，只需要重载 输出运算符 " << " 即可。
+
+ostream 对象将有类型的对象转换为一个字符(字节)流：
+
+    'c', 123, (123,45) --> ostream --> stream buffer --> 字节序列
+    
+    cout << 1; // 将整数转换为字符串，同时输出到stdout
+
+istream 对象将一个字符(字节) 流转换为有类型的对象
+
+字节序列 --> stream buffer --> istream --> 'c', 123, (123, 45)
+
+    int val;
+    cin >> val; // 将stdin输入的字节序列转换为int 值
+
+getline()函数来读取一整行，同时** getline会将行尾的换行符丢掉 **
+    
+### I/O 状态
+每个iostream都有状态，此状态可用来判断流操作是否成功。
+
+    istream &is;
+    is >> c; // is >> c 会跳过空白符，而 is.get() 不会
+    
+### 格式化
+    constexpr double d = 123.456;
+    cout << d << ";"                    // 123.456
+         << scientific << d << ";"      // 1.1234560e2+002;
+         << hexfloat << d << ";"        // 0x1.edd2f2p+6
+         << fixed << d << ";"           // 123.456
+         << defaultfloat << d << '\n';  //默认格式输出 d
+
+### 文件流
+在<fstream>中，标准库提供了从文件读取数据及向文件写入数据的流
+- ifstream 从文件读取数据
+- ofstream 向文件写入数据
+- fstream  读写文件
+
+    
+    ofstream ofs("target");
+    if(!ofs)
+      error("could't open 'target' for writing");
+    
+    ifstream ifs("source");
+    if(!ifs)
+      error("could't open 'source' for writing");
+    假定检测成功， ofs就可以像普通ostream一样使用(就像cout), ifs就像普通istream一样使用
+    
+### 字符串流
+<sstream> 标准库提供了从string读取数据，以及向string写入数据的流:
+- istringstream ：从string读取数据
+- ostringstream ：向string写入数据
+- stringstream： 读写string
+
+istringstream中的内容可以通过 str() 函数来获取。

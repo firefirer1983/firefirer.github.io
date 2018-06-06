@@ -1127,7 +1127,67 @@ for(string line; getline(cin,line);) {
 |   二选一 (或)
 ^   行开始; 非
 $   行结束
-</code></pre>
+
+{n}      严格重复n次         (times == n)
+{n,}     重复n次或更多次     ( times &gt;= n )
+{n,m}    至少重复n次，最多m次 ( times &gt;= n , times &lt;= m )
+*        重复0次或多次(任意次数)
++        重复 1次或者多次  (&gt;= 1)
+?        重复0，或者一次  ( times == 0 || times == 1 )
+</code></pre><p>匹配模式总是查找最长匹配，这就是所谓的<strong> 最长匹配法则 </strong> ， 但是如果在任何重复符号后面放一个?后缀，会使匹配<br>器变得”懒惰，不贪心”，而是查找最短匹配。</p>
+<pre><code>例如：(ab)* 和 (ab)*?
+regex pat{R&quot;(ab)*&quot;};
+regex_search(string(&quot;ababababab&quot;, matches, pat));
+</code></pre><p>＾放在集合［］的开头，表示非，其他位置则表示普通的 ^ 字符</p>
+<pre><code>例如:
+ [^aeiouy] : 匹配非元音字符 (b,c,d ...)
+ [a^eiouy] : 配合元音字符或 ^ 字符
+</code></pre><h3 id="迭代器"><a href="#迭代器" class="headerlink" title="迭代器"></a>迭代器</h3><p>regex_iterator遍历一个流(字符序列)</p>
+<h2 id="I-O-流"><a href="#I-O-流" class="headerlink" title="I/O 流"></a>I/O 流</h2><p>I/O 流库提供了文本和数值的输入输出功能，这种输入输出是带缓冲的，可以是格式化，也可以是未格式化的。</p>
+<ul>
+<li>在<ostream>中，I/O流库为所有的<strong> 内置类型 </strong>都定义了输出操作</ostream></li>
+<li>用户自定义类型定义输出操作也很简单，只需要重载 输出运算符 “ &lt;&lt; “ 即可。</li>
+</ul>
+<p>ostream 对象将有类型的对象转换为一个字符(字节)流：</p>
+<pre><code>&apos;c&apos;, 123, (123,45) --&gt; ostream --&gt; stream buffer --&gt; 字节序列
+
+cout &lt;&lt; 1; // 将整数转换为字符串，同时输出到stdout
+</code></pre><p>istream 对象将一个字符(字节) 流转换为有类型的对象</p>
+<p>字节序列 –&gt; stream buffer –&gt; istream –&gt; ‘c’, 123, (123, 45)</p>
+<pre><code>int val;
+cin &gt;&gt; val; // 将stdin输入的字节序列转换为int 值
+</code></pre><p>getline()函数来读取一整行，同时<strong> getline会将行尾的换行符丢掉 </strong></p>
+<h3 id="I-O-状态"><a href="#I-O-状态" class="headerlink" title="I/O 状态"></a>I/O 状态</h3><p>每个iostream都有状态，此状态可用来判断流操作是否成功。</p>
+<pre><code>istream &amp;is;
+is &gt;&gt; c; // is &gt;&gt; c 会跳过空白符，而 is.get() 不会
+</code></pre><h3 id="格式化"><a href="#格式化" class="headerlink" title="格式化"></a>格式化</h3><pre><code>constexpr double d = 123.456;
+cout &lt;&lt; d &lt;&lt; &quot;;&quot;                    // 123.456
+     &lt;&lt; scientific &lt;&lt; d &lt;&lt; &quot;;&quot;      // 1.1234560e2+002;
+     &lt;&lt; hexfloat &lt;&lt; d &lt;&lt; &quot;;&quot;        // 0x1.edd2f2p+6
+     &lt;&lt; fixed &lt;&lt; d &lt;&lt; &quot;;&quot;           // 123.456
+     &lt;&lt; defaultfloat &lt;&lt; d &lt;&lt; &apos;\n&apos;;  //默认格式输出 d
+</code></pre><h3 id="文件流"><a href="#文件流" class="headerlink" title="文件流"></a>文件流</h3><p>在<fstream>中，标准库提供了从文件读取数据及向文件写入数据的流</fstream></p>
+<ul>
+<li>ifstream 从文件读取数据</li>
+<li>ofstream 向文件写入数据</li>
+<li>fstream  读写文件</li>
+</ul>
+<pre><code>ofstream ofs(&quot;target&quot;);
+if(!ofs)
+  error(&quot;could&apos;t open &apos;target&apos; for writing&quot;);
+
+ifstream ifs(&quot;source&quot;);
+if(!ifs)
+  error(&quot;could&apos;t open &apos;source&apos; for writing&quot;);
+假定检测成功， ofs就可以像普通ostream一样使用(就像cout), ifs就像普通istream一样使用
+</code></pre><h3 id="字符串流"><a href="#字符串流" class="headerlink" title="字符串流"></a>字符串流</h3><p><sstream> 标准库提供了从string读取数据，以及向string写入数据的流:</sstream></p>
+<ul>
+<li>istringstream ：从string读取数据</li>
+<li>ostringstream ：向string写入数据</li>
+<li>stringstream： 读写string</li>
+</ul>
+<p>istringstream中的内容可以通过 str() 函数来获取。</p>
+
           
         
       
