@@ -557,3 +557,98 @@ using size_t = unsigned int;
 - 特殊用途容器 如 array,bitset,tuple
 本质上，C++标准库提供了最常用的基本数据结构及其上的基础算法
 
+
+    <array>         array
+    <chrono>        duration, time_point
+    <cmath>         sqrt(), pow()
+    <complex>       complex, sqrt(), pow()
+    <forward_list>  forward_list
+    <fstream>       fstream, ifstream, ofstream
+    <future>        future, promise
+    <ios>           hex, dec, scientific, fixed, defaultfloat
+    <iostream>      istream, ostream, cin, cout
+    <map>           map, multimap
+    <memory>        unique_ptr, shared_ptr, weak_ptr, allocator
+    <random>        default_random_engine, normal_distribution
+    <regex>         regex, smatch
+    <string>        string, basic_string
+    <set>           set, multiset
+    <sstream>       istrstream, ostrstream
+    <stdexcept>     length_error, out_of_range, runtime_error
+    <thread>        thread
+    <unordered_map> unordered_map, unordered_multimap
+    <utility>       move(), swap(), pair
+    <vector>        vector
+
+来自C中的标准库头文件，例如 <stdlib.h> ，对应版本为 <cstdlib>。声明都在std::的空间中
+
+## 字符串和正则表达式
+string类型，比char*提供更完整的字符串处理能力
+
+### 字符串
+额外的字符串处理能力有：
+- 连接(concat):  "+"
+- 下表操作:  "[] 或 at()"
+- 替换字符串内容: "replace()"
+- C风格字符串(以0结尾的char数组): c_str()
+
+### string的实现
+为了处理多字符集，标准库定义了一个通用的字符串模板 basic_string， string 实际上是此模板的char实例化的一个别名。
+
+    template<typename Char>
+    class basic_string {
+      // ... Char类型的字符串
+    }
+    using string = basic_string<char>
+
+用户可以定义任意类型的字符串，例如日文字符类型：Jchar:
+
+    using Jstring = basic_string<Jchar>;
+    
+    
+### 正则表达式
+
+    regex pat (R"(\w{2}\s*\d{5}(-\d{4})?)"); // 美国邮政编码模式: XXddddd-dddd 及其变形
+    
+原始字符串字面值常量(raw string literal)，其以 -R"" 包括，原始字符串字面量值常量好处式：  
+可以直接包含反斜线 \ 和 "" 而无需转义
+
+<regex>中，正则表达式提供了如下支持：
+- regex_match()：将正则表达式与一个(已知长度的)字符串进行匹配。
+- regex_search()：在一个(任意长的)的数据流中搜索与正则表达式匹配的字符串。
+- regex_replace()：在一个(任意长的)数据流中搜索与正则表达式匹配的字符串并将其替换。
+- regex_iterator：遍历匹配结果和子匹配。
+- regex_token_iterator：遍历未匹配部分。
+
+#### 搜索
+
+    int lineno = 0;
+    for(string line; getline(cin,line);) {
+      ++lineno;
+      smatch matches;
+      if(regex_search(line, matches, pat))
+        cout << lineno << ":" << matches[0] << '\n';
+    }
+    
+regex_search(line, matches, pat) 在line中搜索任何与正则表达式pat 匹配的子串，如果匹配到，就保存在matches中  
+如果没有任何匹配，就返回false。
+smatch matches： smatch实际上是一个string的vector，每个string 保存的是一个子匹配。
+
+    .   任意单个字符("通配符")
+    [   字符集开始
+    ]   字符集结束
+    {   指定重复次数开始
+    }   指定重复次数结束
+    (   分组开始
+    )   分组结束
+    
+    \   下一个字符有特殊含义
+    *   零或多次重复(后缀操作)
+    +   一或多次重复(后缀操作)
+    ?   可选(零或一次)(后缀操作)
+    |   二选一 (或)
+    ^   行开始; 非
+    $   行结束
+    
+    
+    

@@ -1056,7 +1056,78 @@ StringMap&lt;int&gt; m; // m是一个 Map&lt;string, int&gt;
 <li>资源管理的 “智能指针” unique_ptr, shared_ptr, weak_ptr</li>
 <li>特殊用途容器 如 array,bitset,tuple<br>本质上，C++标准库提供了最常用的基本数据结构及其上的基础算法</li>
 </ul>
+<pre><code>&lt;array&gt;         array
+&lt;chrono&gt;        duration, time_point
+&lt;cmath&gt;         sqrt(), pow()
+&lt;complex&gt;       complex, sqrt(), pow()
+&lt;forward_list&gt;  forward_list
+&lt;fstream&gt;       fstream, ifstream, ofstream
+&lt;future&gt;        future, promise
+&lt;ios&gt;           hex, dec, scientific, fixed, defaultfloat
+&lt;iostream&gt;      istream, ostream, cin, cout
+&lt;map&gt;           map, multimap
+&lt;memory&gt;        unique_ptr, shared_ptr, weak_ptr, allocator
+&lt;random&gt;        default_random_engine, normal_distribution
+&lt;regex&gt;         regex, smatch
+&lt;string&gt;        string, basic_string
+&lt;set&gt;           set, multiset
+&lt;sstream&gt;       istrstream, ostrstream
+&lt;stdexcept&gt;     length_error, out_of_range, runtime_error
+&lt;thread&gt;        thread
+&lt;unordered_map&gt; unordered_map, unordered_multimap
+&lt;utility&gt;       move(), swap(), pair
+&lt;vector&gt;        vector
+</code></pre><p>来自C中的标准库头文件，例如 &lt;stdlib.h&gt; ，对应版本为 <cstdlib>。声明都在std::的空间中</cstdlib></p>
+<h2 id="字符串和正则表达式"><a href="#字符串和正则表达式" class="headerlink" title="字符串和正则表达式"></a>字符串和正则表达式</h2><p>string类型，比char*提供更完整的字符串处理能力</p>
+<h3 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h3><p>额外的字符串处理能力有：</p>
+<ul>
+<li>连接(concat):  “+”</li>
+<li>下表操作:  “[] 或 at()”</li>
+<li>替换字符串内容: “replace()”</li>
+<li>C风格字符串(以0结尾的char数组): c_str()</li>
+</ul>
+<h3 id="string的实现"><a href="#string的实现" class="headerlink" title="string的实现"></a>string的实现</h3><p>为了处理多字符集，标准库定义了一个通用的字符串模板 basic_string， string 实际上是此模板的char实例化的一个别名。</p>
+<pre><code>template&lt;typename Char&gt;
+class basic_string {
+  // ... Char类型的字符串
+}
+using string = basic_string&lt;char&gt;
+</code></pre><p>用户可以定义任意类型的字符串，例如日文字符类型：Jchar:</p>
+<pre><code>using Jstring = basic_string&lt;Jchar&gt;;
+</code></pre><h3 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h3><pre><code>regex pat (R&quot;(\w{2}\s*\d{5}(-\d{4})?)&quot;); // 美国邮政编码模式: XXddddd-dddd 及其变形
+</code></pre><p>原始字符串字面值常量(raw string literal)，其以 -R”” 包括，原始字符串字面量值常量好处式：<br>可以直接包含反斜线 \ 和 “” 而无需转义</p>
+<p><regex>中，正则表达式提供了如下支持：</regex></p>
+<ul>
+<li>regex_match()：将正则表达式与一个(已知长度的)字符串进行匹配。</li>
+<li>regex_search()：在一个(任意长的)的数据流中搜索与正则表达式匹配的字符串。</li>
+<li>regex_replace()：在一个(任意长的)数据流中搜索与正则表达式匹配的字符串并将其替换。</li>
+<li>regex_iterator：遍历匹配结果和子匹配。</li>
+<li>regex_token_iterator：遍历未匹配部分。</li>
+</ul>
+<h4 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h4><pre><code>int lineno = 0;
+for(string line; getline(cin,line);) {
+  ++lineno;
+  smatch matches;
+  if(regex_search(line, matches, pat))
+    cout &lt;&lt; lineno &lt;&lt; &quot;:&quot; &lt;&lt; matches[0] &lt;&lt; &apos;\n&apos;;
+}
+</code></pre><p>regex_search(line, matches, pat) 在line中搜索任何与正则表达式pat 匹配的子串，如果匹配到，就保存在matches中<br>如果没有任何匹配，就返回false。<br>smatch matches： smatch实际上是一个string的vector，每个string 保存的是一个子匹配。</p>
+<pre><code>.   任意单个字符(&quot;通配符&quot;)
+[   字符集开始
+]   字符集结束
+{   指定重复次数开始
+}   指定重复次数结束
+(   分组开始
+)   分组结束
 
+\   下一个字符有特殊含义
+*   零或多次重复(后缀操作)
++   一或多次重复(后缀操作)
+?   可选(零或一次)(后缀操作)
+|   二选一 (或)
+^   行开始; 非
+$   行结束
+</code></pre>
           
         
       
