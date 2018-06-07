@@ -1187,6 +1187,238 @@ if(!ifs)
 <li>stringstream： 读写string</li>
 </ul>
 <p>istringstream中的内容可以通过 str() 函数来获取。</p>
+<h2 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h2><h3 id="vector"><a href="#vector" class="headerlink" title="vector"></a>vector</h3><p>vector 就是最常用的容器</p>
+<h3 id="范围检查"><a href="#范围检查" class="headerlink" title="范围检查"></a>范围检查</h3><p>标准库vector的小标操作符 [] 并不进行范围检查，而at() 有范围检查，例如：</p>
+<pre><code>vector&lt;int&gt; book(4) = {0,1,2,3};
+boot.size();// 4
+book[size()]; // 越界访问
+</code></pre><p>at() 会在参数越界时候抛出一个类型为out_of_range的异常</p>
+<h3 id="list"><a href="#list" class="headerlink" title="list"></a>list</h3><p>list是标准库提供的一个双向链表，如果需要在一个序列中添加，删除元素而无需移动其他元素，则应该使用list  </p>
+<ul>
+<li>对于存在着频繁插入，删除操作的功能，应该用list更为适合。</li>
+</ul>
+<h3 id="begin-end-迭代器，需要在标准库容器中定位，增添，删除一个元素，就必须使用到迭代器了。"><a href="#begin-end-迭代器，需要在标准库容器中定位，增添，删除一个元素，就必须使用到迭代器了。" class="headerlink" title="begin(), end() 迭代器，需要在标准库容器中定位，增添，删除一个元素，就必须使用到迭代器了。"></a>begin(), end() 迭代器，需要在标准库容器中定位，增添，删除一个元素，就必须使用到迭代器了。</h3><blockquote>
+<p>当数据量较小的时候，vector的性能会优于list。当我们想要不过是一个元素序列的时候，就应该在vector和list<br>之间选择，除非有充分理由选择list，否则就应该使用vector<br>vector无论在遍历( find(), count()) 还是排序和搜索( sort(), binary_searh())性能都要优于list</p>
+</blockquote>
+<h3 id="map"><a href="#map" class="headerlink" title="map"></a>map</h3><p>map搜索树(红黑树), map也被称为关联数组或字典。map通常用平衡二叉树实现。<br>对map进行下标操作的本质是进行一次搜索，如果未找到key，则自动向map插入一个新元素，它具有给定的key，关联的值<br>是value类型的默认值。  </p>
+<p>因此为了避免自动增添默认值，就应该使用find()和insert()</p>
+<h3 id="unordered-map"><a href="#unordered-map" class="headerlink" title="unordered_map"></a>unordered_map</h3><p>标准哈希容器被称为 “无序” 容器。<br>标准库为 内置类型(int,float,char …) 和 标准库类型(vector, string…) 提供了默认的哈希函数。<br>必要时你可以定义自己的哈希函数，哈希函数通常以函数对象的形式提供：</p>
+<p>标准库的各种容器及它们的基本操作都被设计成相似的，而且不同容器，操作的含义也是相同的。基本操作可用于每一种适用<br>的容器，且可高效实现</p>
+<ul>
+<li>begin()返回首元素和end()返回末尾元素(末尾元素位置 + 1)</li>
+<li>push_back()，高效的在容器末尾添加元素</li>
+<li>size() 返回元素数目</li>
+</ul>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>单纯一个数据结构时没有太大用处的，除了必须的添加，删除简单操作，还需要对他们进行排序，打印，抽取子集，搜索<br>删除元素，等更复杂的操作。</p>
+<p>标准库除了提供常用的容器外，还提供了常用的算法： sort, unique_copy 等</p>
+<blockquote>
+<p>标准库算法都描述为元素(半开)序列上的操作。<br>序列(sequence)由一对迭代器表示，<strong> 分别指向首元素和尾后位置 </strong></p>
+</blockquote>
+<h3 id="使用迭代器"><a href="#使用迭代器" class="headerlink" title="使用迭代器"></a>使用迭代器</h3><p>当拿到一个容器，便可获得一些重要元素的迭代器： begin(), end()。另外很多算法都是返回迭代器，例如find()</p>
+<p>很多标准搜索算法，find()返回 end()表示”未找到”。 </p>
+<p>迭代器的重要作用时分离算法和容器(数据结构)。算法通过迭代器来处理数据，而算法对存储元素的容器一无所知。<br>容器也对算法一无所知，容器只需要按照需求提供迭代器(如 begin() 和 end())</p>
+<h3 id="迭代器类型"><a href="#迭代器类型" class="headerlink" title="迭代器类型"></a>迭代器类型</h3><p>每个迭代器都是与某个特定容器类型相关联的。因此由多少种容器就有多少种迭代器</p>
+<p>所有迭代器的语义及操作的命名都是类似的：<br>例如：</p>
+<ul>
+<li>任何迭代器使用 ++ 运算，都会得到指向下一个元素的迭代器。</li>
+<li>*运算都会得到迭代器所指向的元素</li>
+</ul>
+<h3 id="流迭代器"><a href="#流迭代器" class="headerlink" title="流迭代器"></a>流迭代器</h3><p>迭代器的概念除了用于处理容器元素序列，还用于 输入输出流。<br>可以创建一个ostream_iterator 迭代器来处理输出流。我们需要指出使用哪个流，以及输出对象类型。</p>
+<pre><code>例如：
+ostream_iterator&lt;string&gt; oo{count}; //将字符串写入 cout
+
+这样，向*oo 赋值就会将值打印到cout
+int main() {
+  *oo = &quot;hello&quot;;
+  oo ++;
+  *oo = &quot; world!\n&quot;;
+}
+</code></pre><p>类似，istream_iterator 允许我们将一个输入流作为一个只读容器来处理：</p>
+<pre><code>istream_iterator&lt;string&gt; ii{cin};
+与所有迭代器类似，需要一对输入迭代器来表示一个序列(begin()和end())。
+</code></pre><h3 id="谓词"><a href="#谓词" class="headerlink" title="谓词"></a>谓词</h3><pre><code>auto p = find_if(m.begin(), m.end(), [](const pair&lt;string, int&gt;&amp; r){ return r.second &gt; 42; };
+</code></pre><h3 id="标准库的算法概览"><a href="#标准库的算法概览" class="headerlink" title="标准库的算法概览"></a>标准库的算法概览</h3><blockquote>
+<p>C++的标准库的语境中，算法就是一个对元素序列进行操作的函数模板。 </p>
+</blockquote>
+<p>标准库提供了很多算法，都在std::的命名空间中，通过<algorithm>提供。这些标准库算法都以序列作为输入。[begin(),end())</algorithm></p>
+<pre><code>p = find(b, e, x);  // p是[b:e)中第一个满足 *p == x的迭代器
+p = find_if(b,e,f)  // p是[b:e)中第一个满足f(*p) == true的迭代器
+n = count(b,e,x);   // n是[b:e)中满足*q == x的元素 *q 的数目
+n = count(b,e,f);
+replace(b,e,v,v2);  //将[b:e)中满足 *q == v的元素 *q替换为v2
+replace_if(b,e,f,v2); //
+p = copy(b,e,out); //将[b:e)拷贝到 [out,p)
+p = copy_if(b,e,out,f);
+p = move(b,e,out); //将[b:e) 移动到 [out:p)
+p = unique_copy(b,e,out,f); // 将[b:e)拷贝到[out:p)，不拷贝连续的重复元素
+sort(b,e); // 排序[b:e)中的元素，用 &lt; 作为排序标准
+sort(b,e,f); //排序[b:e)中的元素，用谓词f作为排序标准
+(p1,p2) = equal_range(b,e,v); //[p1:p2)是已经排序序列[b:e)的子序列，其中的元素值都
+p = merge(b,e,b2,e2,out);  // 将两个序列[b:e) 和 [b2:e2)合并，结果保存到[out:p)
+</code></pre><p>一些算法会修改元素的值，但是没有算法会在容器中添加或删除元素，原因在于序列中并不包含底层容器的信息。<br>如果需要添加元素，就需要使用了解容器信息的函数：如 back_inserter，或者直接访问容器本身，如push_back()或erase()</p>
+<h3 id="容器算法"><a href="#容器算法" class="headerlink" title="容器算法"></a>容器算法</h3><h2 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h2><h3 id="资源管理-1"><a href="#资源管理-1" class="headerlink" title="资源管理"></a>资源管理</h3><blockquote>
+<p>资源，就是指程序中符合<strong> 先获取，再使用，后释放 </strong> 规律的东西。<br>RAII 是C++处理资源的基础，容器(vector,map), string, iostream管理资源(文件句柄和缓冲区)的方式是类似的。</p>
+</blockquote>
+<h4 id="unique-ptr-和-shared-ptr"><a href="#unique-ptr-和-shared-ptr" class="headerlink" title="unique_ptr 和 shared_ptr"></a>unique_ptr 和 shared_ptr</h4><p>定义在作用域上的对象，作用域结束的时候会自动释放资源。<br>如果对象是在 heap 上分配的，标准库提供了 unique_ptr 和 shared_ptr 两个”智能指针” 工具，将heap 分配的资源<br>和域作用域上分配的资源绑定起来，实现自动释放的功能。</p>
+<ol>
+<li>unique_ptr 对应所有权唯一的情况。</li>
+<li>shared_ptr 对应共享所有权的情况。</li>
+</ol>
+<p>在什么情况下我们应该选择”只能指针” ，而不是带有特定操作的资源句柄(比如 vector 和 thread)?</p>
+<blockquote>
+<p>答案是：”当我们需要使用指针的语义时候”</p>
+<ol>
+<li>当我们共享某个对象，需要让多个指针或者引用指向共享对象，此时选择shared_ptr</li>
+<li>当我们使用一个多态对象，很难确切知道对象是什么类型，此时unique_ptr称为必然选择</li>
+<li>共享的多态对象通常会用到shared_ptr</li>
+</ol>
+</blockquote>
+<h4 id="特殊容器"><a href="#特殊容器" class="headerlink" title="特殊容器"></a>特殊容器</h4><pre><code>T[N]：           内置数组
+arrary&lt;T,N&gt;      是一段尺寸固定且连续分配的序列，包含N个T类型的元素;与内置数组类似，但是解决了很多问题。
+bitset&lt;N&gt;        一段固定大小的序列，包含N位
+vector&lt;bool&gt;     一段位的序列，紧密存储在一个特殊的vector 中
+pair&lt;T,U&gt;        两个元素，分别类型为T和U
+tuple&lt;T...&gt;      一段序列，存放着任意类型的元素，元素个数任意
+basic_string&lt;C&gt;  一段字符序列，字符类型是C; 提供字符串操作。
+valarray&lt;T&gt;      一个数组，包含T类型的数值;提供数值操作。
+</code></pre><h4 id="array"><a href="#array" class="headerlink" title="array"></a>array</h4><p><array> 中的 array 表示一个<strong> 尺寸固定 </strong> 的元素序列，元素个数在编译时指定。<br>因此array的元素可以位于栈中或者对象内，也可以位于静态存储空间。元素所属的作用域就是array的作用域<br>array 不会自动转换为指针，比内置数组更加安全：</array></p>
+<pre><code>Circle a1[10];
+array&lt;Circle, 10&gt; a2;
+Shape *p1 = a1; // 语法上正确，但是存在严重隐患
+Shape *p2 = a2; // 报告 语法错误，无法编译通过
+p1[3].draw(); // 程序错误 (因为 sizeof(Shape) &lt; sizeof(Circle)，导致 p[3] 的时候会出现错误偏移量。
+</code></pre><h4 id="bitset"><a href="#bitset" class="headerlink" title="bitset"></a>bitset</h4><p>各种位运算，以及左移和右移都可能用在bitset上</p>
+<pre><code>bitset&lt;9&gt; bs3 = ~bs1;
+</code></pre><h4 id="pair-和-tuple"><a href="#pair-和-tuple" class="headerlink" title="pair 和 tuple"></a>pair 和 tuple</h4><h4 id="时间"><a href="#时间" class="headerlink" title="时间"></a>时间</h4><pre><code>#include &lt;chrono&gt;
+auto t0 = high_resolution_clock::now();
+do_work();
+auto t1 = high_resolution_clock::now();
+cout &lt;&lt; duration_cast&lt;milliseconds&gt;(t1-t0).count() &lt;&lt; &quot; ms\n&quot;;
+</code></pre><h4 id="函数适配器"><a href="#函数适配器" class="headerlink" title="函数适配器"></a>函数适配器</h4><p>函数适配器接受一个函数作为它的参数，返回的结果是一个函数对象，我们可以使用这个函数对象调用原来的函数。</p>
+<p>bind() 和 mem_fn 适配器绑定参数。</p>
+<p>mem_fn函数适配器生成一个函数对象，我们能够调用非成员函数一样调用这个函数对象：</p>
+<pre><code>void user(Shape *p)
+{
+  p-&gt;draw();
+  auto draw = mem_fn(&amp;Shape::draw);
+  draw(p);
+}
+
+void draw_all(vector&lt;Shape*&gt; &amp;v) {
+  for_each(v.begin(), v.end(), mem_fn(&amp;Shape::draw));
+}
+
+void draw_all(vector&lt;Shape*&gt; &amp;v) {
+  for_each(v.begin(), v.end(), [](Shape* s){ s-&gt;draw(); });
+}
+</code></pre><h4 id="function"><a href="#function" class="headerlink" title="function"></a>function</h4><p>标准库 function 是一种数据类型，它可以存放任意对象，只要该对象能用运算符()调用。也就是说：<br><strong> 类型 function 的对象是一个函数对象 </strong> </p>
+<h3 id="类型函数"><a href="#类型函数" class="headerlink" title="类型函数"></a>类型函数</h3><p>类型函数(type function)是指<strong> 在编译期求值的函数 </strong>，它接受要给类型作为实参或者返回一个类型作为结果。标准库提供了大量的类型函数。</p>
+<p>constexpr float min = numeric_limits<float>::min();<br>sizeof() 其实也是一个类型函数。</float></p>
+<blockquote>
+<p>类型函数是C++编译期计算机制的一部分，它允许程序进行轻量级类型检查以获取更优的性能。<br>我们通常把这种用法称为 <strong> 元编程 </strong> (meta programming)</p>
+</blockquote>
+<blockquote>
+<p>当含有模板时称为 <strong> 模板元编程 </strong> (template metaprogramming)</p>
+</blockquote>
+<h4 id="iterator-traits"><a href="#iterator-traits" class="headerlink" title="iterator_traits"></a>iterator_traits</h4><h2 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h2><h3 id="任务和thread"><a href="#任务和thread" class="headerlink" title="任务和thread"></a>任务和thread</h3><p>将与其他计算并行执行的计算，成为任务(task)。线程(thread)是任务在程序中的系统级表示。<br>若要启动一个与其他任务并发执行的任务，可构造一个std::thread，将任务作为他的参数，任务以函数或函数对象的形式实现</p>
+<pre><code>// 函数
+void f(); 
+
+//函数对象    
+struct F{
+  void operator(){};
+};
+
+void user() {
+  thread t1{f};
+  thread t2 {F()};
+
+  t1.join(); //等待t1完成
+  t2.join(); //等待t2完成
+}
+</code></pre><p> 由于两个任务(线程)是共享一个地址空间，因此两个线程间可共享数据。<br> 在定义一个并发程序的时候，我们的目标是保持任务的完全隔离，唯一例外是任务见通信的部分。<br> 考虑一个并发任务的最简单方式是将它看作一个可以与调用者并发执行的函数。为此我们只需传递参数，获取结果并保证<br> 两者不同时使用共享数据。</p>
+<h3 id="传递参数"><a href="#传递参数" class="headerlink" title="传递参数"></a>传递参数</h3><p>任务通常要处理数据，我们将数据(或指向数据的指针或引用)作为参数传递给任务：</p>
+<pre><code>void f(vector&lt;double&gt;&amp; v);
+struct F {
+  vector&lt;double&gt;&amp; v;
+  F(vector&lt;double&gt;&amp; vv): v(vv){};
+  void operator(){};
+};
+
+int main(){
+  vector&lt;double&gt; v1 = {1,2,3,4};
+  vector&lt;double&gt; v2 = {9,8,7,6};
+  thread t1{f, ref(v1)}; // f(v1) 在一个独立的线程中执行
+  thread t2{F(v2)}; // f(v2) 在一个独立的线程中执行
+}
+</code></pre><p>thread t1{f, ref(v1)}; // 这里使用了thread的可变参数模板构造函数，它接受一个任意的参数序列<br>我们必须使用ref()来告诉可变参数模板将v2作为一个引用而不是一个对象来处理。</p>
+<h3 id="返回结果"><a href="#返回结果" class="headerlink" title="返回结果"></a>返回结果</h3><p>将输入数据以const引用方式传递，并将保存结果的内存地址作为第二个参数传递给线程</p>
+<pre><code>void f(const vector &amp;v, double *res){};
+struct F {
+  F(const vector &amp;vv, double *d):
+        v(vv),
+        res(d){
+  }
+  void operator()(){};
+};
+
+int main(){
+  vector&lt;double&gt; v1 = {1,2,3,4};
+  vector&lt;double&gt; v2 = {9,8,7,6};
+  double res1;
+  double res2;
+  thread t1{f, cref(v1), &amp;res1);
+  thread t2{F(v2, &amp;res2)};
+
+  t1.join();
+  t2.join();
+};
+</code></pre><h3 id="共享数据"><a href="#共享数据" class="headerlink" title="共享数据"></a>共享数据</h3><p>互斥对象： mutex</p>
+<pre><code>mutex m;
+int sh;
+void f() {
+  unique_lock&lt;mutex&gt; lck{m};
+  sh += 7;
+} // 隐式释放mutex
+</code></pre><p>unique_lock的构造函数获取了互斥对象(通过调用 m.lock())。</p>
+<p>共享数据和mutex间是一种常规的对应关系：程序员必须知道那个mutex对应哪个数据，显然这容易出错，我们应该借助<br>多种语言特性来使这种关系更为清晰：</p>
+<pre><code>class Record{
+public:
+    mutex rm;
+};
+</code></pre><p>通过共享数据进行通讯是一种很底层的方式。特别是程序员必须想方设法了解各种任务已经执行那些工作，及尚未执行那些工作。<br>在这方面共享数据不如调用-返回模式。</p>
+<pre><code>class Message {
+  Message(string&amp; m):
+    msg(m){};
+
+private:
+  string msg;
+};
+queue&lt;Message&gt; msgQueue;
+mutex msgMutex;
+condition_variable msgCond;
+
+void consumer() {
+  unique_lock&lt;mutex&gt; lck(msgMutex);
+  while(msgCond.wait(lck)){};
+  auto m = msgQueue.front();
+  msgQueue.pop();
+  lck.unlock();
+}
+
+void producer() {
+  auto m = new Message(&quot;hello world\n&quot;);
+  unique_lock&lt;mutex&gt; lck(msgMutex);
+  msgQueue.push_back(m);
+  msgCond.notify_one();
+}
+</code></pre><h3 id="任务通讯"><a href="#任务通讯" class="headerlink" title="任务通讯"></a>任务通讯</h3><p>标准库提供了一些特性，允许程序员在抽象的任务层(工作并执行)进行操作，而不是在底层的线程和锁的层次直接进行操作</p>
+<p><future></future></p>
+<ol>
+<li>future 和 promise 用来从一个独立线程上创建出的任务返回值。</li>
+<li>package_task 是帮助启动任务以及连接返回结果的机制。</li>
+<li>async() 以类似调用函数的方式启动一个任务。</li>
+</ol>
 
           
         

@@ -946,3 +946,134 @@ sizeof() 其实也是一个类型函数。
 > 当含有模板时称为 ** 模板元编程 ** (template metaprogramming)
 
 #### iterator_traits
+
+
+## 并发
+### 任务和thread
+将与其他计算并行执行的计算，成为任务(task)。线程(thread)是任务在程序中的系统级表示。
+若要启动一个与其他任务并发执行的任务，可构造一个std::thread，将任务作为他的参数，任务以函数或函数对象的形式实现
+
+    // 函数
+    void f(); 
+
+    //函数对象    
+    struct F{
+      void operator(){};
+    };
+    
+    void user() {
+      thread t1{f};
+      thread t2 {F()};
+      
+      t1.join(); //等待t1完成
+      t2.join(); //等待t2完成
+    }
+ 
+ 由于两个任务(线程)是共享一个地址空间，因此两个线程间可共享数据。  
+ 在定义一个并发程序的时候，我们的目标是保持任务的完全隔离，唯一例外是任务见通信的部分。  
+ 考虑一个并发任务的最简单方式是将它看作一个可以与调用者并发执行的函数。为此我们只需传递参数，获取结果并保证  
+ 两者不同时使用共享数据。
+ 
+### 传递参数
+任务通常要处理数据，我们将数据(或指向数据的指针或引用)作为参数传递给任务：
+ 
+    void f(vector<double>& v);
+    struct F {
+      vector<double>& v;
+      F(vector<double>& vv): v(vv){};
+      void operator(){};
+    };
+    
+    int main(){
+      vector<double> v1 = {1,2,3,4};
+      vector<double> v2 = {9,8,7,6};
+      thread t1{f, ref(v1)}; // f(v1) 在一个独立的线程中执行
+      thread t2{F(v2)}; // f(v2) 在一个独立的线程中执行
+    }
+  
+thread t1{f, ref(v1)}; // 这里使用了thread的可变参数模板构造函数，它接受一个任意的参数序列  
+我们必须使用ref()来告诉可变参数模板将v2作为一个引用而不是一个对象来处理。
+
+### 返回结果
+将输入数据以const引用方式传递，并将保存结果的内存地址作为第二个参数传递给线程
+
+    void f(const vector &v, double *res){};
+    struct F {
+      F(const vector &vv, double *d):
+            v(vv),
+            res(d){
+      }
+      void operator()(){};
+    };
+    
+    int main(){
+      vector<double> v1 = {1,2,3,4};
+      vector<double> v2 = {9,8,7,6};
+      double res1;
+      double res2;
+      thread t1{f, cref(v1), &res1);
+      thread t2{F(v2, &res2)};
+      
+      t1.join();
+      t2.join();
+    };
+    
+### 共享数据
+互斥对象： mutex
+
+    mutex m;
+    int sh;
+    void f() {
+      unique_lock<mutex> lck{m};
+      sh += 7;
+    } // 隐式释放mutex
+
+unique_lock的构造函数获取了互斥对象(通过调用 m.lock())。
+
+共享数据和mutex间是一种常规的对应关系：程序员必须知道那个mutex对应哪个数据，显然这容易出错，我们应该借助  
+多种语言特性来使这种关系更为清晰：
+
+    class Record{
+    public:
+        mutex rm;
+    };
+    
+通过共享数据进行通讯是一种很底层的方式。特别是程序员必须想方设法了解各种任务已经执行那些工作，及尚未执行那些工作。
+在这方面共享数据不如调用-返回模式。
+
+
+    class Message {
+      Message(string& m):
+        msg(m){};
+        
+    private:
+      string msg;
+    };
+    queue<Message> msgQueue;
+    mutex msgMutex;
+    condition_variable msgCond;
+    
+    void consumer() {
+      unique_lock<mutex> lck(msgMutex);
+      while(msgCond.wait(lck)){};
+      auto m = msgQueue.front();
+      msgQueue.pop();
+      lck.unlock();
+    }
+    
+    void producer() {
+      auto m = new Message("hello world\n");
+      unique_lock<mutex> lck(msgMutex);
+      msgQueue.push_back(m);
+      msgCond.notify_one();
+    }
+
+
+### 任务通讯
+标准库提供了一些特性，允许程序员在抽象的任务层(工作并执行)进行操作，而不是在底层的线程和锁的层次直接进行操作
+<future>
+1. future 和 promise 用来从一个独立线程上创建出的任务返回值。
+2. package_task 是帮助启动任务以及连接返回结果的机制。
+3. async() 以类似调用函数的方式启动一个任务。
+
+
