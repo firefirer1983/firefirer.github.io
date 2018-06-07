@@ -731,3 +731,218 @@ getline()函数来读取一整行，同时** getline会将行尾的换行符丢�
 - stringstream： 读写string
 
 istringstream中的内容可以通过 str() 函数来获取。
+
+## 容器
+
+### vector 
+vector 就是最常用的容器
+
+### 范围检查
+标准库vector的小标操作符 [] 并不进行范围检查，而at() 有范围检查，例如：
+
+    vector<int> book(4) = {0,1,2,3};
+    boot.size();// 4
+    book[size()]; // 越界访问
+    
+at() 会在参数越界时候抛出一个类型为out_of_range的异常
+
+### list
+list是标准库提供的一个双向链表，如果需要在一个序列中添加，删除元素而无需移动其他元素，则应该使用list  
+- 对于存在着频繁插入，删除操作的功能，应该用list更为适合。
+
+### begin(), end() 迭代器，需要在标准库容器中定位，增添，删除一个元素，就必须使用到迭代器了。
+
+> 当数据量较小的时候，vector的性能会优于list。当我们想要不过是一个元素序列的时候，就应该在vector和list
+> 之间选择，除非有充分理由选择list，否则就应该使用vector
+> vector无论在遍历( find(), count()) 还是排序和搜索( sort(), binary_searh())性能都要优于list
+
+### map
+map搜索树(红黑树), map也被称为关联数组或字典。map通常用平衡二叉树实现。
+对map进行下标操作的本质是进行一次搜索，如果未找到key，则自动向map插入一个新元素，它具有给定的key，关联的值
+是value类型的默认值。  
+
+因此为了避免自动增添默认值，就应该使用find()和insert()
+
+### unordered_map
+标准哈希容器被称为 "无序" 容器。
+标准库为 内置类型(int,float,char ...) 和 标准库类型(vector, string...) 提供了默认的哈希函数。  
+必要时你可以定义自己的哈希函数，哈希函数通常以函数对象的形式提供：
+
+标准库的各种容器及它们的基本操作都被设计成相似的，而且不同容器，操作的含义也是相同的。基本操作可用于每一种适用
+的容器，且可高效实现
+    
+- begin()返回首元素和end()返回末尾元素(末尾元素位置 + 1)
+- push_back()，高效的在容器末尾添加元素
+- size() 返回元素数目
+
+## 算法
+单纯一个数据结构时没有太大用处的，除了必须的添加，删除简单操作，还需要对他们进行排序，打印，抽取子集，搜索   
+删除元素，等更复杂的操作。
+
+标准库除了提供常用的容器外，还提供了常用的算法： sort, unique_copy 等
+
+> 标准库算法都描述为元素(半开)序列上的操作。
+> 序列(sequence)由一对迭代器表示，** 分别指向首元素和尾后位置 **
+
+### 使用迭代器
+当拿到一个容器，便可获得一些重要元素的迭代器： begin(), end()。另外很多算法都是返回迭代器，例如find()
+
+很多标准搜索算法，find()返回 end()表示"未找到"。 
+
+迭代器的重要作用时分离算法和容器(数据结构)。算法通过迭代器来处理数据，而算法对存储元素的容器一无所知。  
+容器也对算法一无所知，容器只需要按照需求提供迭代器(如 begin() 和 end())
+
+### 迭代器类型
+每个迭代器都是与某个特定容器类型相关联的。因此由多少种容器就有多少种迭代器
+
+所有迭代器的语义及操作的命名都是类似的：  
+例如：
+- 任何迭代器使用 ++ 运算，都会得到指向下一个元素的迭代器。
+- *运算都会得到迭代器所指向的元素
+
+### 流迭代器
+迭代器的概念除了用于处理容器元素序列，还用于 输入输出流。
+可以创建一个ostream_iterator 迭代器来处理输出流。我们需要指出使用哪个流，以及输出对象类型。
+
+    例如：
+    ostream_iterator<string> oo{count}; //将字符串写入 cout
+    
+    这样，向*oo 赋值就会将值打印到cout
+    int main() {
+      *oo = "hello";
+      oo ++;
+      *oo = " world!\n";
+    }
+    
+类似，istream_iterator 允许我们将一个输入流作为一个只读容器来处理：
+
+    istream_iterator<string> ii{cin};
+    与所有迭代器类似，需要一对输入迭代器来表示一个序列(begin()和end())。
+    
+### 谓词
+
+    auto p = find_if(m.begin(), m.end(), [](const pair<string, int>& r){ return r.second > 42; };
+
+### 标准库的算法概览
+> C++的标准库的语境中，算法就是一个对元素序列进行操作的函数模板。 
+
+标准库提供了很多算法，都在std::的命名空间中，通过<algorithm>提供。这些标准库算法都以序列作为输入。[begin(),end())
+
+    p = find(b, e, x);  // p是[b:e)中第一个满足 *p == x的迭代器
+    p = find_if(b,e,f)  // p是[b:e)中第一个满足f(*p) == true的迭代器
+    n = count(b,e,x);   // n是[b:e)中满足*q == x的元素 *q 的数目
+    n = count(b,e,f);
+    replace(b,e,v,v2);  //将[b:e)中满足 *q == v的元素 *q替换为v2
+    replace_if(b,e,f,v2); //
+    p = copy(b,e,out); //将[b:e)拷贝到 [out,p)
+    p = copy_if(b,e,out,f);
+    p = move(b,e,out); //将[b:e) 移动到 [out:p)
+    p = unique_copy(b,e,out,f); // 将[b:e)拷贝到[out:p)，不拷贝连续的重复元素
+    sort(b,e); // 排序[b:e)中的元素，用 < 作为排序标准
+    sort(b,e,f); //排序[b:e)中的元素，用谓词f作为排序标准
+    (p1,p2) = equal_range(b,e,v); //[p1:p2)是已经排序序列[b:e)的子序列，其中的元素值都
+    p = merge(b,e,b2,e2,out);  // 将两个序列[b:e) 和 [b2:e2)合并，结果保存到[out:p)
+    
+一些算法会修改元素的值，但是没有算法会在容器中添加或删除元素，原因在于序列中并不包含底层容器的信息。  
+如果需要添加元素，就需要使用了解容器信息的函数：如 back_inserter，或者直接访问容器本身，如push_back()或erase()
+
+
+### 容器算法
+
+## 实用工具
+
+### 资源管理
+> 资源，就是指程序中符合** 先获取，再使用，后释放 ** 规律的东西。 
+RAII 是C++处理资源的基础，容器(vector,map), string, iostream管理资源(文件句柄和缓冲区)的方式是类似的。
+
+#### unique_ptr 和 shared_ptr
+定义在作用域上的对象，作用域结束的时候会自动释放资源。
+如果对象是在 heap 上分配的，标准库提供了 unique_ptr 和 shared_ptr 两个"智能指针" 工具，将heap 分配的资源
+和域作用域上分配的资源绑定起来，实现自动释放的功能。
+
+1. unique_ptr 对应所有权唯一的情况。
+2. shared_ptr 对应共享所有权的情况。
+
+
+在什么情况下我们应该选择"只能指针" ，而不是带有特定操作的资源句柄(比如 vector 和 thread)?
+> 答案是："当我们需要使用指针的语义时候"
+1. 当我们共享某个对象，需要让多个指针或者引用指向共享对象，此时选择shared_ptr
+2. 当我们使用一个多态对象，很难确切知道对象是什么类型，此时unique_ptr称为必然选择
+3. 共享的多态对象通常会用到shared_ptr
+
+#### 特殊容器
+
+    T[N]：           内置数组
+    arrary<T,N>      是一段尺寸固定且连续分配的序列，包含N个T类型的元素;与内置数组类似，但是解决了很多问题。
+    bitset<N>        一段固定大小的序列，包含N位
+    vector<bool>     一段位的序列，紧密存储在一个特殊的vector 中
+    pair<T,U>        两个元素，分别类型为T和U
+    tuple<T...>      一段序列，存放着任意类型的元素，元素个数任意
+    basic_string<C>  一段字符序列，字符类型是C; 提供字符串操作。
+    valarray<T>      一个数组，包含T类型的数值;提供数值操作。
+    
+#### array
+<array> 中的 array 表示一个** 尺寸固定 ** 的元素序列，元素个数在编译时指定。  
+因此array的元素可以位于栈中或者对象内，也可以位于静态存储空间。元素所属的作用域就是array的作用域
+array 不会自动转换为指针，比内置数组更加安全：
+
+    Circle a1[10];
+    array<Circle, 10> a2;
+    Shape *p1 = a1; // 语法上正确，但是存在严重隐患
+    Shape *p2 = a2; // 报告 语法错误，无法编译通过
+    p1[3].draw(); // 程序错误 (因为 sizeof(Shape) < sizeof(Circle)，导致 p[3] 的时候会出现错误偏移量。
+    
+#### bitset
+各种位运算，以及左移和右移都可能用在bitset上
+
+    bitset<9> bs3 = ~bs1;
+    
+#### pair 和 tuple
+
+#### 时间
+
+    #include <chrono>
+    auto t0 = high_resolution_clock::now();
+    do_work();
+    auto t1 = high_resolution_clock::now();
+    cout << duration_cast<milliseconds>(t1-t0).count() << " ms\n";
+
+#### 函数适配器
+函数适配器接受一个函数作为它的参数，返回的结果是一个函数对象，我们可以使用这个函数对象调用原来的函数。
+
+bind() 和 mem_fn 适配器绑定参数。
+
+mem_fn函数适配器生成一个函数对象，我们能够调用非成员函数一样调用这个函数对象：
+
+    void user(Shape *p)
+    {
+      p->draw();
+      auto draw = mem_fn(&Shape::draw);
+      draw(p);
+    }
+    
+    void draw_all(vector<Shape*> &v) {
+      for_each(v.begin(), v.end(), mem_fn(&Shape::draw));
+    }
+    
+    void draw_all(vector<Shape*> &v) {
+      for_each(v.begin(), v.end(), [](Shape* s){ s->draw(); });
+    }
+    
+#### function
+
+标准库 function 是一种数据类型，它可以存放任意对象，只要该对象能用运算符()调用。也就是说：  
+** 类型 function 的对象是一个函数对象 ** 
+
+### 类型函数
+类型函数(type function)是指** 在编译期求值的函数 **，它接受要给类型作为实参或者返回一个类型作为结果。标准库提供了大量的类型函数。
+
+constexpr float min = numeric_limits<float>::min();
+sizeof() 其实也是一个类型函数。
+
+> 类型函数是C++编译期计算机制的一部分，它允许程序进行轻量级类型检查以获取更优的性能。    
+我们通常把这种用法称为 ** 元编程 ** (meta programming)
+
+> 当含有模板时称为 ** 模板元编程 ** (template metaprogramming)
+
+#### iterator_traits
